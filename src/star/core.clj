@@ -5,7 +5,8 @@
 
 (def ^:dynamic *client*)
 
-(defn with-client [client & body]
+
+(defmacro with-client [client & body]
   (binding [*client* client]
     ~@body))
 
