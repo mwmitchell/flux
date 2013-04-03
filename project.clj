@@ -7,4 +7,5 @@
                  [org.apache.solr/solr-core "4.2.0"
                   :exclusions [javax.servlet/servlet-api]]
                  [org.apache.solr/solr-solrj "4.2.0"]
+                 [com.vividsolutions/jts "1.13"]
                  [ring/ring-core "1.1.8"]])
