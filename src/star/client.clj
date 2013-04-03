@@ -1,34 +1,45 @@
-(ns star.client
-  (import [java.io File]
-          [org.apache.solr.client.solrj.impl HttpSolrServer]
-          [org.apache.solr.client.solrj.embedded EmbeddedSolrServer]
-          [org.apache.solr.core CoreContainer]))
+(defn star.client)
 
-(defmulti create-client :type)
+;;to switch cores via http, the base path must change
+;;to switch cores via EmbeddedSolrServer, the core-name must be accessed directly
 
-(defn create-core-container [solr-home-path solr-config-path]
-  (CoreContainer. solr-home-path
-                  (File. solr-config-path)))
+(defmulti add (fn [in] (case (map? in) :one (coll? in) :many :else :many)))
 
-(defn create-embedded-client [core-container & [core-name]]
-  (if core-name
-    (EmbeddedSolrServer. core-container core-name)
-    (EmbeddedSolrServer. core-container)))
+(defmethod add :one
+  [client doc & {:as opts}]
+  (.add client (create-doc doc)))
 
-(defn create-http-client [base-url]
-  (HttpSolrServer. base-url))
+(defmethod add :one
+  [client docs & {:as opts}]
+  (.add client (map create-doc docs)))
 
-(defmethod create-client :embedded [base-config]
-  {:pre [(:core-container base-config) (:core-name base-config)]}
-  (create-embedded-client (:core-container base-config) (:core-name base-config)))
+(defn commit [client & {:as opts}]
+  (.commit client))
 
-(letfn [(create-server-url [{:keys [protocol host port path core]}]
-          (str protocol "://" host ":" port path (if core (str "/" (name core)))))]
-  (defmethod create-client :default [base-config]
-    (let [config (merge {:protocol "http"
-                         :host "127.0.0.1"
-                         :port 8983
-                         :path "/solr"
-                         :core-name nil}
-                        base-config)]
-      (create-http-client (create-server-url config)))))
+(defmulti delete-by-id (fn [in] (cond (coll? in) :many :else :one)))
+(defmethod delete-by-id :many [client ids & {:as opts}]
+  (.deleteById client ids))
+(defmethod delete-by-id :one [client id & {:as opts}]
+  (.deleteById client id))
+
+(defn delete-by-query [client q & {:as opts}]
+  (.deleteByQuery client q))
+
+(defn optimize
+  ([client] (.optimize client))
+  ([client wait-flush wait-searcher]
+     (.optimize client wait-flush wait-searcher))
+  ([client wait-flush wait-searcher max-segments]
+     (.optimize client wait-flush wait-searcher max-segments)))
+
+(defn query [q & {:as opts}])
+
+(defn rollback [client]
+  (.rollback client))
+
+(defn shutdown [client]
+  (.shutdown client))
+
+(defn ping [client]
+  (.ping client))
+
