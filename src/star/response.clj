@@ -49,11 +49,18 @@
 (defn convert-value
   [v]
   (cond
+   (instance? SimpleOrderedMap v) (convert-named-list v)
    (instance? SolrDocumentList v) (remap-response v)
    (instance? NamedList v) (convert-named-list v)
    (instance? ArrayList v) (vec (map convert-value v))
    :else v))
 
+(defn update-response [ur]
+  {:status (.getStatus ur)
+   :elaspsed-time (.getElapsedTime ur)
+   :q-time (.getQTime ur)
+   :request-url (.getRequestUrl ur)})
+
 (defn response-base
   [^SolrResponseBase r]
-  (convert-named-list (.getResponse r)) {:response r})
+  (convert-named-list (.getResponse r)))

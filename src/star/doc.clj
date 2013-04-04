@@ -1,3 +1,0 @@
-(ns star.doc
-  )
-

@@ -1,45 +1,54 @@
-(defn star.client)
+(ns star.client
+  (require [star.util :refer [create-doc create-query]]
+           [star.response :as response]))
 
-;;to switch cores via http, the base path must change
-;;to switch cores via EmbeddedSolrServer, the core-name must be accessed directly
+(defn query [solr-server query & [options]]
+  (response/response-base (.query solr-server (create-query query options))))
 
-(defmulti add (fn [in] (case (map? in) :one (coll? in) :many :else :many)))
+(defmulti add
+  (fn [_ input & _]
+    (cond
+     (map? input) :one
+     :else :default)))
 
-(defmethod add :one
-  [client doc & {:as opts}]
-  (.add client (create-doc doc)))
+(defmethod add :one [client doc & {:as opts}]
+  (response/update-response
+   (.add client (create-doc doc))))
 
-(defmethod add :one
-  [client docs & {:as opts}]
-  (.add client (map create-doc docs)))
+(defmethod add :default [client docs & {:as opts}]
+  (response/update-response
+   (.add client (map create-doc docs))))
 
 (defn commit [client & {:as opts}]
-  (.commit client))
+  (response/update-response (.commit client)))
 
-(defmulti delete-by-id (fn [in] (cond (coll? in) :many :else :one)))
-(defmethod delete-by-id :many [client ids & {:as opts}]
-  (.deleteById client ids))
-(defmethod delete-by-id :one [client id & {:as opts}]
-  (.deleteById client id))
+(letfn [(v [x]
+          (cond (keyword? x) (name x) :else (str x)))]
+  (defn delete-by-id [client ids & {:as opts}]
+    (response/update-response
+     (.deleteById client (if (coll? ids) (map v ids) (v ids))))))
 
 (defn delete-by-query [client q & {:as opts}]
-  (.deleteByQuery client q))
+  (response/update-response
+   (.deleteByQuery client q)))
 
 (defn optimize
-  ([client] (.optimize client))
+  ([client]
+     (response/update-response
+      (.optimize client)))
   ([client wait-flush wait-searcher]
-     (.optimize client wait-flush wait-searcher))
+     (response/update-response
+      (.optimize client wait-flush wait-searcher)))
   ([client wait-flush wait-searcher max-segments]
-     (.optimize client wait-flush wait-searcher max-segments)))
-
-(defn query [q & {:as opts}])
+     (response/update-response
+      (.optimize client wait-flush wait-searcher max-segments))))
 
 (defn rollback [client]
-  (.rollback client))
+  (response/update-response
+   (.rollback client)))
 
 (defn shutdown [client]
   (.shutdown client))
 
 (defn ping [client]
   (.ping client))
-
