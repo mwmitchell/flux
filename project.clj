@@ -1,4 +1,4 @@
-(defproject electrojet "0.1.0-SNAPSHOT"
+(defproject flux "0.1.0-SNAPSHOT"
   :description "A clojure client library for Solr"
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
