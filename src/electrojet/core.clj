@@ -12,7 +12,7 @@
 
 (defmacro create-fn [name]
   `(defn ~name [& args#]
-     (apply (ns-resolve 'star.client '~name) *connection* args#)))
+     (apply (ns-resolve 'electrojet.client '~name) *connection* args#)))
 
 (create-fn ping)
 (create-fn add)
