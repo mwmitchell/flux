@@ -1,4 +1,4 @@
-# electrojet
+# flux
 
 A Clojure based Solr client.
 
