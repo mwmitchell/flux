@@ -7,8 +7,7 @@ A Clojure based Solr client.
 ###Http
 
 ```clojure
-(require '[electrojet.core :as ej])
-(require '[electrojet.http :as http])
+(require '[flux.http :as http])
 
 (def conn (http/create "http://localhost:8983/solr" :collection1))
 ```
@@ -16,8 +15,7 @@ A Clojure based Solr client.
 ###Embedded
 
 ```clojure
-(require '[electrojet.core :as ej])
-(require '[electrojet.embedded :as embedded])
+(require '[flux.embedded :as embedded])
 
 (def core (embedded/create-core "path/to/solr-home" "path/to/solr.xml"))
 (def conn (embedded/create core :collection1))
@@ -27,6 +25,8 @@ A Clojure based Solr client.
 Once a connection as been created, use the with-connection macro to wrap client calls:
 
 ```clojure
+(require '[flux.core :as ej])
+
 (ej/with-connection conn
     (ej/add [{:id 1} {:id 2}])
     (ej/commit)
