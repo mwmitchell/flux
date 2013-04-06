@@ -1,6 +1,6 @@
-(ns star.core-test
+(ns electrojet.core-test
   (:use clojure.test
-        star.core))
+        electrojet.core))
 
 (deftest a-test
   (testing "FIXME, I fail."

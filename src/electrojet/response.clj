@@ -1,4 +1,4 @@
-(ns star.response
+(ns electrojet.response
   (:import [org.apache.solr.client.solrj.response SolrResponseBase]
            [org.apache.solr.common.util NamedList SimpleOrderedMap]
            [org.apache.solr.common SolrDocumentList]

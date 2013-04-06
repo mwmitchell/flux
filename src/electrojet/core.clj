@@ -1,6 +1,6 @@
-(ns star.core
+(ns electrojet.core
   (require
-   [star [client :as client]
+   [electrojet [client :as client]
     [embedded :as embedded]
     [http :as http]]))
 
@@ -23,14 +23,3 @@
 (create-fn delete-by-id)
 (create-fn delete-by-query)
 (create-fn shutdown)
-
-(def cc (embedded/create-core-container "solr-home/home"
-                                        "solr-home/home/solr.xml"))
-
-(def hotels
-  (embedded/create cc "books"))
-
-(with-connection hotels
-  (delete-by-query "*:*")
-  (rollback)
-  (query "*:*"))

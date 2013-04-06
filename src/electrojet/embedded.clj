@@ -1,4 +1,4 @@
-(ns star.embedded
+(ns electrojet.embedded
   (import [java.io File]
           [org.apache.solr.client.solrj.embedded EmbeddedSolrServer]
           [org.apache.solr.core CoreContainer]))

@@ -1,4 +1,4 @@
-(ns star.http
+(ns electrojet.http
   (import [org.apache.solr.client.solrj.impl HttpSolrServer]))
 
 (defn create [base-url core-name]

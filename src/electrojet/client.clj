@@ -1,6 +1,6 @@
-(ns star.client
-  (require [star.util :refer [create-doc create-query]]
-           [star.response :as response]))
+(ns electrojet.client
+  (require [electrojet.util :refer [create-doc create-query]]
+           [electrojet.response :as response]))
 
 (defn query [solr-server query & [options]]
   (response/response-base (.query solr-server (create-query query options))))

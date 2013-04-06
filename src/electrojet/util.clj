@@ -1,4 +1,4 @@
-(ns star.util
+(ns electrojet.util
   (import [org.apache.solr.common.params MultiMapSolrParams]
           [org.apache.solr.common SolrInputDocument]))
 
