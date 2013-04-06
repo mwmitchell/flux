@@ -25,12 +25,12 @@ A Clojure based Solr client.
 Once a connection as been created, use the with-connection macro to wrap client calls:
 
 ```clojure
-(require '[flux.core :as ej])
+(require '[flux.core :as flux])
 
-(ej/with-connection conn
-    (ej/add [{:id 1} {:id 2}])
-    (ej/commit)
-	(ej/query "*:*"))
+(flux/with-connection conn
+    (flux/add [{:id 1} {:id 2}])
+    (flux/commit)
+	(flux/query "*:*"))
 ```
 
 ## License
