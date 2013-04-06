@@ -19,8 +19,8 @@
 
 (defn remap-response
   [l]
-  {:maxScore (.getMaxScore l)
-   :numFound (.getNumFound l)
+  {:max-score (.getMaxScore l)
+   :num-found (.getNumFound l)
    :start (.getStart l)
    :docs (map create-map-from-document (iterator-seq (.iterator l)))})
 
