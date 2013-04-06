@@ -1,4 +1,4 @@
-(ns flux.util
+(ns flux.query
   (import [org.apache.solr.common.params MultiMapSolrParams]
           [org.apache.solr.common SolrInputDocument]))
 
@@ -14,15 +14,6 @@
                  (.put (format-param %2)
                        (format-values %3)))
               (java.util.HashMap.) m)))
-
-(defn create-doc [document-map]
-  (reduce-kv #(if (map? %3)
-                (let [m (doto (java.util.HashMap.)
-                          (.put (name (key (first %3))) (val (first %3))))]
-                  (doto %1 (.addField (name %2) m))
-                  %1)
-                (doto %1 (.addField (name %2) %3)))
-             (SolrInputDocument.) document-map))
 
 (defn create-query [query options]
   (create-solr-params (assoc options :q query)))
