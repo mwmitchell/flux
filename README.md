@@ -24,7 +24,7 @@ A Clojure based Solr client.
 ```
 
 ###Client
-Once a connection as been created, use the with-connection macro to wrap you client calls:
+Once a connection as been created, use the with-connection macro to wrap client calls:
 
 ```clojure
 (ej/with-connection conn
