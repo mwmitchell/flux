@@ -1,6 +1,8 @@
 (ns flux.update
   (import [org.apache.solr.common SolrInputDocument]))
 
+;; NOTE: The result of this function is a SolrInputDocument
+;; which throws an exception when printed!
 (defn create-doc [document-map]
   (reduce-kv #(if (map? %3)
                 (let [m (doto (java.util.HashMap.)
