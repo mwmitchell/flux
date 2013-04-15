@@ -34,7 +34,7 @@ Once a connection as been created, use the with-connection macro to wrap client 
 ```
 
 ###Test
-```bash
+```shell
 lein midje
 ```
 
