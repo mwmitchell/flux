@@ -33,6 +33,11 @@ Once a connection as been created, use the with-connection macro to wrap client 
 	(flux/query "*:*"))
 ```
 
+###Test
+```bash
+lein midje
+```
+
 ## License
 
 Copyright © 2013 Matt Mitchell
