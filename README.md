@@ -1,6 +1,6 @@
 # flux
 
-A Clojure based Solr client.
+A Clojure based Solr client. Current version support is 4.6.0.
 
 ## Usage
 
@@ -17,7 +17,19 @@ A Clojure based Solr client.
 ```clojure
 (require '[flux.embedded :as embedded])
 
-(def core (embedded/create-core "path/to/solr-home" "path/to/solr.xml"))
+(def cc (embedded/create-core-container "path/to/solr-home" "path/to/solr.xml"))
+```
+
+####Core auto-discovery
+Flux also supports core.properties. Just give `create-core` the solr-home path as the only argument and Flux will use the org.apache.solr.core.CoresLocator object for discovering cores:
+
+```clojure
+(def cc (embedded/create-core-container "path/to/solr-home"))
+```
+
+Now create the embedded server instance:
+
+```clojure
 (def conn (embedded/create core :collection1))
 ```
 
