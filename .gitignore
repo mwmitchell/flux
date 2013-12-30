@@ -7,3 +7,6 @@ pom.xml
 .lein-repl-history
 /target/
 .DS_Store
+
+/.nrepl-port
+/pom.xml.asc
