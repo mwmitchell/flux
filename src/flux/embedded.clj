@@ -17,5 +17,6 @@
   ([^String solr-home-path ^String solr-config-path]
      (CoreContainer/createAndLoad solr-home-path (File. solr-config-path))))
 
-(defn create [core-container core-name]
-  (EmbeddedSolrServer. core-container core-name))
+(defn create [^CoreContainer core-container core-name]
+  {:pre [(some #(% core-name) [string? keyword?])]}
+  (EmbeddedSolrServer. core-container (name core-name)))
