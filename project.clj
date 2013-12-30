@@ -5,5 +5,7 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [org.apache.solr/solr-core "4.6.0"]
-                 [org.apache.solr/solr-solrj "4.6.0"]]
+                 [org.apache.solr/solr-solrj "4.6.0"]
+                 ;; EmbeddedSolrServer requires this, unfortunately:
+                 [javax.servlet/servlet-api "2.5"]]
   :profiles {:dev {:dependencies [[midje "1.5.1"]]}})
