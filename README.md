@@ -30,7 +30,7 @@ Flux also supports core.properties. Just give `create-core` the solr-home path a
 Now create the embedded server instance:
 
 ```clojure
-(def conn (embedded/create core :collection1))
+(def conn (embedded/create cc :collection1))
 ```
 
 ###Client
