@@ -1,6 +1,6 @@
 # flux
 
-A Clojure based Solr client. Current version support is `4.6.0`.
+A Clojure based Solr client. Current Apache Solr version support is `4.6.0`.
 
 ## Installation (Leiningen)
 
