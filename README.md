@@ -2,6 +2,12 @@
 
 A Clojure based Solr client. Current version support is `4.6.0`.
 
+## Installation (Leiningen)
+
+To include the Flux library, add the following to your `:dependencies`:
+
+    [com.codesignals/flux "0.3.1"]
+
 ## Usage
 
 ###Http
