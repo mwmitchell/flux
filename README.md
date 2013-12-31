@@ -47,6 +47,13 @@ Once a connection as been created, use the `with-connection` macro to wrap clien
 	(flux/query "*:*"))
 ```
 
+###javax.servlet/servlet-api and EmbeddedSolrServer
+
+Unfortunately, EmbeddedSolrServer requires javax.servlet/servlet-api as an implicit dependency. Because of this, Flux adds this lib as a depedency.
+
+  * http://wiki.apache.org/solr/Solrj#EmbeddedSolrServer
+  * http://lucene.472066.n3.nabble.com/EmbeddedSolrServer-java-lang-NoClassDefFoundError-javax-servlet-ServletRequest-td483937.html
+
 ###Test
 ```shell
 lein midje
