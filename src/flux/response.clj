@@ -63,4 +63,6 @@
 
 (defn response-base
   [^SolrResponseBase r]
-  (convert-named-list (.getResponse r)))
+  (assoc-in
+   (convert-named-list (.getResponse r))
+   [:responseHeader :elaspsedTime] (.getElapsedTime r)))
