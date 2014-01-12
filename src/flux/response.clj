@@ -55,12 +55,6 @@
    (instance? ArrayList v) (vec (map convert-value v))
    :else v))
 
-;; (defn update-response [ur]
-;;   {:status (.getStatus ur)
-;;    :elaspsedTime (.getElapsedTime ur)
-;;    :qTime (.getQTime ur)
-;;    :requestUrl (.getRequestUrl ur)})
-
 (defn response-base
   [^SolrResponseBase r]
   (assoc-in
