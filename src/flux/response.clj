@@ -19,8 +19,8 @@
 
 (defn remap-response
   [l]
-  {:max-score (.getMaxScore l)
-   :num-found (.getNumFound l)
+  {:maxScore (.getMaxScore l)
+   :numFound (.getNumFound l)
    :start (.getStart l)
    :docs (map create-map-from-document (iterator-seq (.iterator l)))})
 
@@ -55,11 +55,11 @@
    (instance? ArrayList v) (vec (map convert-value v))
    :else v))
 
-(defn update-response [ur]
-  {:status (.getStatus ur)
-   :elaspsed-time (.getElapsedTime ur)
-   :q-time (.getQTime ur)
-   :request-url (.getRequestUrl ur)})
+;; (defn update-response [ur]
+;;   {:status (.getStatus ur)
+;;    :elaspsedTime (.getElapsedTime ur)
+;;    :qTime (.getQTime ur)
+;;    :requestUrl (.getRequestUrl ur)})
 
 (defn response-base
   [^SolrResponseBase r]
