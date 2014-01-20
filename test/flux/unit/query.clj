@@ -6,7 +6,7 @@
   (create-query-request {:q "*:*"}) => anything)
 
 (fact "create-query-request w/path"
-  (create-query-request {:q "*:*"} "/docs") => anything)
+  (create-query-request "/docs" {:q "*:*"}) => anything)
 
 (fact "create-query-request w/path and method"
-  (create-query-request {:q "*:*"} "/docs" :post) => anything)
+  (create-query-request :post "/docs" {:q "*:*"}) => anything)

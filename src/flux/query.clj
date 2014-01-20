@@ -25,10 +25,10 @@
 
 (defn create-query-request
   ([params]
-     (create-query-request params nil))
-  ([params path]
-     (create-query-request params path :get))
-  ([params path method]
+     (create-query-request nil params))
+  ([path params]
+     (create-query-request :get path params))
+  ([method path params]
      {:pre [(or (nil? path) (re-find #"^\/" (str path)))
             (get method-map method)]}
      (doto
