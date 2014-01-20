@@ -17,6 +17,7 @@
 (create-fn ping)
 (create-fn add)
 (create-fn query)
+(create-fn request)
 (create-fn commit)
 (create-fn optimize)
 (create-fn rollback)
