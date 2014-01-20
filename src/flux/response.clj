@@ -28,7 +28,7 @@
   (merge
    {:numFound (.getNumFound obj)
     :start (.getStart obj)
-    :docs (map ->clojure (iterator-seq (.iterator obj)))}
+    :docs (mapv ->clojure (iterator-seq (.iterator obj)))}
    (when-let [ms (.getMaxScore obj)]
      {:maxScore ms})))
 
