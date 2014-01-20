@@ -28,7 +28,8 @@ To include the Flux library, add the following to your `:dependencies`:
 
 ####Core auto-discovery
 Flux also supports `core.properties`. Just give `create-core` the solr-home path as the only argument.
-Note: It's important to call the `load` method on the resulting `CoreContainer` instance:
+
+  Note: It's important to call the `load` method on the resulting `CoreContainer` instance:
 
 ```clojure
 (def cc (doto (embedded/create-core-container "path/to/solr-home")
