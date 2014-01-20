@@ -6,6 +6,9 @@
 (defn query [solr-server query & [options]]
   (->clojure (.query solr-server (create-query query options))))
 
+(defn request [solr-server request]
+  (->clojure (.request solr-server request)))
+
 (defmulti add
   (fn [_ input & _]
     (cond
