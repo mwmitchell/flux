@@ -27,7 +27,7 @@ To include the Flux library, add the following to your `:dependencies`:
 ```
 
 ####Core auto-discovery
-Flux also supports `core.properties`. Just give `create-core` the solr-home path as the only argument and Flux will use the `org.apache.solr.core.CoresLocator` object for discovering cores.
+Flux also supports `core.properties`. Just give `create-core` the solr-home path as the only argument.
 Note: It's important to call the `load` method on the resulting `CoreContainer` instance:
 
 ```clojure
@@ -45,12 +45,16 @@ Now create the embedded server instance:
 Once a connection as been created, use the `with-connection` macro to wrap client calls:
 
 ```clojure
-(require '[flux.core :as flux])
+(require '[flux.core :as flux]
+          [flux.query :as q])
 
 (flux/with-connection conn
     (flux/add [{:id 1} {:id 2}])
     (flux/commit)
-	(flux/query "*:*"))
+    (flux/query "*:*")
+    ;; Or set the path and/or method:
+    (flux/request
+      (q/create-query-request :post "/docs" {:q "etc"}))
 ```
 
 ###javax.servlet/servlet-api and EmbeddedSolrServer
