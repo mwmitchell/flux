@@ -6,7 +6,7 @@ A Clojure based Solr client. Current Apache Solr version support is `4.6.0`.
 
 To include the Flux library, add the following to your `:dependencies`:
 
-    [com.codesignals/flux "0.3.2"]
+    [com.codesignals/flux "0.4.0"]
 
 ## Usage
 
