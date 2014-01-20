@@ -1,7 +1,6 @@
 (ns flux.unit.update
-  (:use clojure.test
-        flux.update
-        midje.sweet))
+  (:require [flux.update :refer :all]
+            [midje.sweet :refer :all]))
 
 (fact "create-doc"
   (class (create-doc {:id 1})) => org.apache.solr.common.SolrInputDocument)

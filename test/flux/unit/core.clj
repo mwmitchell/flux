@@ -1,8 +1,7 @@
 (ns flux.unit.core
-  (:use clojure.test
-        flux.core
-        midje.sweet)
-  (:require [flux.client :as client]))
+  (:require [flux.client :as client]
+            [flux.core :refer :all]
+            [midje.sweet :refer :all]))
 
 (fact "query"
   (with-connection ..connection..
