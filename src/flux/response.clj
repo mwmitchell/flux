@@ -1,62 +1,53 @@
 (ns flux.response
-  (:import [org.apache.solr.client.solrj.response SolrResponseBase]
+  (:import [org.apache.solr.client.solrj SolrResponse]
            [org.apache.solr.common.util NamedList SimpleOrderedMap]
-           [org.apache.solr.common SolrDocumentList]
+           [org.apache.solr.common SolrDocumentList SolrDocument]
+           [org.apache.solr.common SolrInputDocument]
            [java.util ArrayList]))
 
-(defn create-map-from-document [document]
-  (into {}
-        (for [fld (.getFieldNames document)]
-          {(keyword fld) (.getFieldValue document fld)})))
+;; TODO: Rename this ns to something like "conversion", not "response"
 
-(declare convert-value)
+(defmulti ->clojure class)
 
-(defn convert-key
-  [k]
-  (if (string? k)
-    (keyword k)
-    k))
+(defmethod ->clojure SimpleOrderedMap [obj]
+  (reduce
+   (fn [acc o]
+     (assoc acc (keyword (.getKey o)) (->clojure (.getValue o))))
+   {}
+   (iterator-seq (.iterator obj))))
 
-(defn remap-response
-  [l]
-  {:maxScore (.getMaxScore l)
-   :numFound (.getNumFound l)
-   :start (.getStart l)
-   :docs (map create-map-from-document (iterator-seq (.iterator l)))})
+(defmethod ->clojure NamedList [obj]
+  (mapv
+   #(vector (.getKey %) (->clojure (.getValue %)))
+   (iterator-seq (.iterator obj))))
 
-(defn convert-map-entry
-  "Converts a MapEntry from a NamedList into a vector with 2 values. Nested NamedLists are recursively converted. "
-  [map-entry]
-  (let [k (convert-key (.getKey map-entry))
-        v (convert-value (.getValue map-entry))]
-    [k v]))
+(defmethod ->clojure ArrayList [obj]
+  (mapv ->clojure obj))
 
-(defn- uniquify-paired-seq
-  "removes values when dup-key-in-paired-seq? returns true"
-  [coll]
-  (map #(first (val %1)) (group-by first coll)))
+(defmethod ->clojure SolrDocumentList [obj]
+  (merge
+   {:numFound (.getNumFound obj)
+    :start (.getStart obj)
+    :docs (map ->clojure (iterator-seq (.iterator obj)))}
+   (when-let [ms (.getMaxScore obj)]
+     {:maxScore ms})))
 
-(defn convert-named-list
-  "Converts a NamedList into a array-map. Nested NamedLists are recursively converted. "
-  [named-list]
-  (let [itrseq (iterator-seq (.iterator named-list))
-        converted (map convert-map-entry itrseq)
-        reduced (uniquify-paired-seq converted)
-        flattened (apply concat reduced)
-        result (apply array-map flattened)]
-    result))
+(defmethod ->clojure SolrDocument [obj]
+  (reduce
+   (fn [acc f]
+     (assoc acc (keyword f) (->clojure (.getFieldValue obj f))))
+   {}
+   (.getFieldNames obj)))
 
-(defn convert-value
-  [v]
-  (cond
-   (instance? SimpleOrderedMap v) (convert-named-list v)
-   (instance? SolrDocumentList v) (remap-response v)
-   (instance? NamedList v) (convert-named-list v)
-   (instance? ArrayList v) (vec (map convert-value v))
-   :else v))
+(defmethod ->clojure SolrResponse [obj]
+  (->clojure (.getResponse obj)))
 
-(defn response-base
-  [^SolrResponseBase r]
-  (assoc-in
-   (convert-named-list (.getResponse r))
-   [:responseHeader :elaspsedTime] (.getElapsedTime r)))
+(defmethod ->clojure SolrInputDocument [obj]
+  (reduce
+   (fn [acc o]
+     (assoc acc (keyword o) (.getFieldValue obj o)))
+   {}
+   (.getFieldNames obj)))
+
+(defmethod ->clojure :default [obj]
+  obj)

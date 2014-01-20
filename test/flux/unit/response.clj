@@ -6,4 +6,4 @@
 
 (fact "create-map-from-document"
   (let [doc (update/create-doc {:id 1})]
-    (create-map-from-document doc) => {:id 1}))
+    (->clojure doc) => {:id 1}))
