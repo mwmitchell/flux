@@ -7,4 +7,5 @@
                  [org.apache.solr/solr-core "4.9.0"]
                  [org.apache.solr/solr-solrj "4.9.0"]
                  [javax.servlet/servlet-api "2.5"]]
-  :profiles {:dev {:dependencies [[midje "1.5.1"]]}})
+  :profiles {:dev {:dependencies [[midje "1.6.3"]]
+                   :plugins [[lein-midje "3.1.1"]]}})
