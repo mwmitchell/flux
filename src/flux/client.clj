@@ -1,12 +1,14 @@
 (ns flux.client
   (require [flux.update :refer [create-doc]]
            [flux.query :refer [create-query]]
-           [flux.response :refer [->clojure]]))
+           [flux.response :refer [->clojure]])
+  (import [org.apache.solr.client.solrj SolrServer]
+          [org.apache.solr.common SolrInputDocument]))
 
-(defn query [solr-server query & [options]]
+(defn query [^SolrServer solr-server query & [options]]
   (->clojure (.query solr-server (create-query query options))))
 
-(defn request [solr-server request]
+(defn request [^SolrServer solr-server request]
   (->clojure (.request solr-server request)))
 
 (defmulti add
@@ -15,38 +17,39 @@
      (map? input) :one
      :else :default)))
 
-(defmethod add :one [client doc & {:as opts}]
+(defmethod add :one [^SolrServer client doc & {:as opts}]
   (->clojure (.add client (create-doc doc))))
 
-(defmethod add :default [client docs & {:as opts}]
-  (->clojure (.add client (map create-doc docs))))
+(defmethod add :default [^SolrServer client docs & {:as opts}]
+  (->clojure (.add client ^java.util.Collection (map create-doc docs))))
 
-(defn commit [client & {:as opts}]
+(defn commit [^SolrServer client & {:as opts}]
   (->clojure (.commit client)))
 
 (letfn [(v [x]
           (cond (keyword? x) (name x) :else (str x)))]
-  (defn delete-by-id [client ids & {:as opts}]
+  (defn delete-by-id [^SolrServer client ids & {:as opts}]
     (->clojure
-     (.deleteById client (if (coll? ids) (map v ids) (v ids))))))
+     (let [ids (if (coll? ids) (map v ids) (v ids))]
+      (.deleteById ^SolrServer client ^java.util.List ids)))))
 
-(defn delete-by-query [client q & {:as opts}]
+(defn delete-by-query [^SolrServer client q & {:as opts}]
   (->clojure (.deleteByQuery client q)))
 
 (defn optimize
-  ([client]
+  ([^SolrServer client]
      (->clojure (.optimize client)))
-  ([client wait-flush wait-searcher]
+  ([^SolrServer client wait-flush wait-searcher]
      (->clojure (.optimize client wait-flush wait-searcher)))
-  ([client wait-flush wait-searcher max-segments]
+  ([^SolrServer client wait-flush wait-searcher max-segments]
      (->clojure
       (.optimize client wait-flush wait-searcher max-segments))))
 
-(defn rollback [client]
+(defn rollback [^SolrServer client]
   (->clojure (.rollback client)))
 
-(defn shutdown [client]
+(defn shutdown [^SolrServer client]
   (->clojure (.shutdown client)))
 
-(defn ping [client]
+(defn ping [^SolrServer client]
   (->clojure (.ping client)))
