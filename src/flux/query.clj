@@ -15,9 +15,10 @@
 
 (defn- create-solr-params [m]
   (MultiMapSolrParams.
-   (reduce-kv #(doto %1
-                 (.put (format-param %2)
-                       (format-values %3)))
+   (reduce-kv (fn [^java.util.HashMap hm k v]
+                (doto hm
+                  (.put (format-param k)
+                        (format-values v))))
               (java.util.HashMap.) m)))
 
 (defn create-query [query options]
