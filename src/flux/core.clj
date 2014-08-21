@@ -1,8 +1,5 @@
 (ns flux.core
-  (require
-   [flux [client :as client]
-    [embedded :as embedded]
-    [http :as http]]))
+  (require [flux [client :as client]]))
 
 (def ^:dynamic *connection*)
 
@@ -17,6 +14,7 @@
 (create-fn ping)
 (create-fn add)
 (create-fn query)
+(create-fn streaming-query)
 (create-fn request)
 (create-fn commit)
 (create-fn optimize)

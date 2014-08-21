@@ -1,12 +1,27 @@
 (ns flux.client
-  (require [flux.update :refer [create-doc]]
-           [flux.query :refer [create-query]]
-           [flux.response :refer [->clojure]]))
+  (:require [flux.update :refer [create-doc]]
+            [flux.request.query :as q :refer [create-params]]
+            [flux.response :refer [->clojure]])
+  (:import [org.apache.solr.client.solrj SolrRequest]
+           [org.apache.solr.client.solrj SolrServer]))
 
 (defn query [solr-server query & [options]]
-  (->clojure (.query solr-server (create-query query options))))
+  (->clojure (.query solr-server (create-params query options))))
 
-(defn request [solr-server request]
+(defn streaming-query [connection params a b]
+  (->clojure
+   (.queryAndStreamResponse
+    connection
+    (q/create-params params)
+    (q/create-streaming-callback
+     (fn [& args] (->clojure (apply a (mapv ->clojure args))))
+     (fn [& args] (->clojure (apply b (mapv ->clojure args))))))))
+
+(defn streaming-query [connection params a b]
+  (q/streaming-query connection (q/create-params params)))
+
+(defn request [^SolrServer solr-server
+               ^SolrRequest request]
   (->clojure (.request solr-server request)))
 
 (defmulti add
