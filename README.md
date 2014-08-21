@@ -1,12 +1,12 @@
 # flux
 
-A Clojure based Solr client. Current Apache Solr version support is `4.6.0`.
+A Clojure based Solr client. Current Apache Solr version support is `4.9.0`.
 
 ## Installation (Leiningen)
 
 To include the Flux library, add the following to your `:dependencies`:
 
-    [com.codesignals/flux "0.4.0"]
+    [com.codesignals/flux "0.5.0"]
 
 ## Usage
 
@@ -72,6 +72,6 @@ lein midje
 
 ## License
 
-Copyright © 2013 Matt Mitchell
+Copyright © 2013-2014 Matt Mitchell
 
 Distributed under the Eclipse Public License, the same as Clojure.
