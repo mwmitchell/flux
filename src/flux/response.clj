@@ -7,6 +7,12 @@
 
 ;; TODO: Rename this ns to something like "conversion", not "response"
 
+(defn convert-key
+  [k]
+  (if (string? k)
+    (keyword k)
+    k))
+
 (defmulti ->clojure class)
 
 (defmethod ->clojure SimpleOrderedMap [^SimpleOrderedMap obj]
@@ -17,9 +23,10 @@
    (iterator-seq (.iterator obj))))
 
 (defmethod ->clojure NamedList [^NamedList obj]
-  (mapv
-   (fn [^java.util.Map$Entry o] (vector (.getKey o) (->clojure (.getValue o))))
-   (iterator-seq (.iterator obj))))
+  (into {}
+        (mapv
+         (fn [^java.util.Map$Entry o] (vector (convert-key (.getKey o)) (->clojure (.getValue o))))
+         (iterator-seq (.iterator obj)))))
 
 (defmethod ->clojure ArrayList [obj]
   (mapv ->clojure obj))
