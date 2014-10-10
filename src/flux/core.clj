@@ -2,7 +2,8 @@
   (require
    [flux [client :as client]
     [embedded :as embedded]
-    [http :as http]]))
+    [http :as http]
+    [cloud :as cloud]]))
 
 (def ^:dynamic *connection*)
 
