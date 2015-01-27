@@ -1,9 +1,5 @@
 (ns flux.core
-  (require
-   [flux [client :as client]
-    [embedded :as embedded]
-    [http :as http]
-    [cloud :as cloud]]))
+  (require [flux.client]))
 
 (def ^:dynamic *connection*)
 

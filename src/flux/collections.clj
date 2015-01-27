@@ -1,6 +1,5 @@
 (ns flux.collections
-  (:require [flux.core :as core]
-            [flux.cloud :as cloud]
+  (:require [flux.client :as client]
             [flux.query :as q]))
 
 (defn solr-node-name
@@ -10,33 +9,34 @@
 
 (defn all-replicas
   [connection collection]
+  (let [request (q/create-query-request :get "/admin/collections"
+                                        {:action "clusterstatus" :collection collection})
+        response (client/request connection request)
+        shards (get-in response [:cluster :collections (keyword collection) "shards"])]
+    (into {} (map (fn [[_ v]] (get v "replicas")) shards))))
+
+(defn try-all-replicas [connection collection]
   (try
-    (core/with-connection connection
-                          (let [response (core/request
-                                           (q/create-query-request :get "/admin/collections"
-                                                                   {:action "clusterstatus" :collection collection}))
-                                shards (get-in response [:cluster :collections (keyword collection) "shards"])]
-                            (into {}
-                                  (map (fn [[k v]] (get v "replicas")) shards))))
-    (catch Exception e {})))
+    (all-replicas connection collection)
+    (catch Throwable _ {})))
 
 (defn active?
   "Returns true if replica is in active state"
   {:static true}
-  [replica]
-  (= "active" (get-in (second replica) ["state"])))
+  [[_ {:strs [state]}]]
+  (= "active" state))
 
 (defn recovering?
   "Returns true if replica is in recovery state"
   {:static true}
-  [replica]
-  (= "recovery" (get-in (second replica) ["state"])))
+  [[_ {:strs [state]}]]
+  (= "recovery" state))
 
 (defn down?
   "Returns true if replica is in down state"
   {:static true}
-  [replica]
-  (= "down" (get-in (second replica) ["state"])))
+  [[_ {:strs [state]}]]
+  (= "down" state))
 
 (defn not-active?
   "Returns true if replica is not in active state"
@@ -44,49 +44,55 @@
   [replica]
   (not (active? replica)))
 
+(defn node-name
+  "Returns the node name of the replica"
+  {:static true}
+  [[_ {:strs [node_name]}]]
+  node_name)
+
 (defn hosted-by?
   "Returns true if given replica is hosted locally by given host/port"
   {:static true}
   [replica host-port]
-  (= (solr-node-name host-port) (get-in (second replica) ["node_name"])))
+  (= (node-name replica) (solr-node-name host-port)))
 
 (defn leader?
   "Returns true if given replica is a leader"
   {:static true}
-  [replica]
-  (= "true" (get-in (second replica) ["leader"])))
+  [[_ {:keys [leader]}]]
+  (= "true" leader))
 
 (defn wait-until-active
   "Waits (infinitely) until all solr replicas hosted by given host/port belonging to given collection are in active state"
   [connection collection host-port]
-  (loop []
-    (let [replicas (all-replicas connection collection)]
-      (when (or
-              (empty? replicas)
-              (some
-                not-active?
-                (filter
-                  (fn [x] (hosted-by? x host-port))
-                  (all-replicas connection collection))))
-        (Thread/sleep 1000)
-        (recur)))))
+  (loop [replicas (try-all-replicas connection collection)]
+    (when-not (->> replicas
+                   (filter active?)
+                   (filter #(hosted-by? %1 host-port))
+                   (seq))
+      (Thread/sleep 1000)
+      (recur (try-all-replicas connection collection)))))
 
 (defn create-collection
   "Create a SolrCloud collection"
-  ([connection collection-name num-shards] (create-collection connection collection-name num-shards 1 {}))
-  ([connection collection-name num-shards replication-factor] (create-collection connection collection-name num-shards replication-factor {}))
+  ([connection collection-name num-shards]
+   (create-collection connection collection-name num-shards 1 {}))
+  ([connection collection-name num-shards replication-factor]
+   (create-collection connection collection-name num-shards replication-factor {}))
   ([connection collection-name num-shards replication-factor params]
-   (core/with-connection connection (let [with-params (assoc params "action" "create"
-                                                                    "name" collection-name
-                                                                    "numShards" num-shards
-                                                                    "replicationFactor" replication-factor)]
-                                      (core/request
-                                        (q/create-query-request :get "/admin/collections" with-params))))))
+   (let [with-params (assoc params
+                            "action" "create"
+                            "name" collection-name
+                            "numShards" num-shards
+                            "replicationFactor" replication-factor)]
+     (client/request
+      connection
+      (q/create-query-request :get "/admin/collections" with-params)))))
 
 (defn delete-collection
   "Delete a SolrCloud collection"
   [connection collection-name]
-  (core/with-connection connection (let [with-params {"action" "delete"
-                                                      "name"   collection-name}]
-                                     (core/request
-                                       (q/create-query-request :get "/admin/collections" with-params)))))
+  (let [with-params {"action" "delete" "name" collection-name}]
+    (client/request
+     connection
+     (q/create-query-request :get "/admin/collections" with-params))))
