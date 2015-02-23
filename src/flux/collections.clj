@@ -73,8 +73,17 @@
       (Thread/sleep 1000)
       (recur (try-all-replicas connection collection)))))
 
+(defn- collection-crud
+  "CRUD helper for collections "
+  [connection params]
+  (client/request
+   connection
+   (q/create-query-request :get "/admin/collections" params)))
+
 (defn create-collection
   "Create a SolrCloud collection"
+  ([connection collection-name]
+   (create-collection connection collection-name 1 1 {}))
   ([connection collection-name num-shards]
    (create-collection connection collection-name num-shards 1 {}))
   ([connection collection-name num-shards replication-factor]
@@ -85,14 +94,19 @@
                             "name" collection-name
                             "numShards" num-shards
                             "replicationFactor" replication-factor)]
-     (client/request
-      connection
-      (q/create-query-request :get "/admin/collections" with-params)))))
+     (collection-crud connection with-params))))
 
 (defn delete-collection
   "Delete a SolrCloud collection"
   [connection collection-name]
-  (let [with-params {"action" "delete" "name" collection-name}]
-    (client/request
-     connection
-     (q/create-query-request :get "/admin/collections" with-params))))
+  (collection-crud connection {"action" "delete" "name" collection-name}))
+
+(defn reload-collection
+  "Reloads a SolrCloud collection"
+  [connection collection-name]
+  (collection-crud connection {"action" "reload" "name" collection-name}))
+
+(defn list-collections
+  "Lists all the Solr collections"
+  [connection]
+  (collection-crud connection {"action" "list"}))
