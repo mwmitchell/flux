@@ -164,6 +164,14 @@ Once a connection as been created, use the `with-connection` macro to wrap clien
       (q/create-query-request :post "/docs" {:q "etc"}))
 ```
 
+####Query options
+You can also specify additional query options (filter queries, fields, ...):
+
+```clojure
+   (let [options {:fq {:id 1 :range_field [1 5]} :sort "id asc" :fl ["id" "another_field"]}]
+    (flux/query "*:*" options)
+```
+
 ###javax.servlet/servlet-api and EmbeddedSolrServer
 
 Unfortunately, EmbeddedSolrServer requires javax.servlet/servlet-api as an implicit dependency. Because of this, Flux adds this lib as a depedency.

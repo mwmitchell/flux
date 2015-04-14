@@ -13,6 +13,15 @@
 (defn- format-values [v]
   (into-array (mapv format-param (if (coll? v) v [v]))))
 
+(defn- format-range [coll]
+  (str "[" (format-param (first coll)) " TO " (format-param (second coll)) "]"))
+
+(defn- format-fq [[k v]]
+  (str (format-param k) ":" (if (coll? v) (format-range v) (format-param v))))
+
+(defn format-filter-queries [hm]
+  (mapv format-fq hm))
+
 (defn- create-solr-params [m]
   (MultiMapSolrParams.
    (reduce-kv (fn [^java.util.HashMap hm k v]
@@ -22,7 +31,8 @@
               (java.util.HashMap.) m)))
 
 (defn create-query [query options]
-  (create-solr-params (assoc options :q query)))
+  (let [filter-queries (format-filter-queries (:fq options))]
+   (create-solr-params (assoc (assoc options :fq filter-queries) :q query))))
 
 (defn create-query-request
   ([params]
