@@ -166,15 +166,27 @@ Once a connection as been created, use the `with-connection` macro to wrap clien
 
 ###javax.servlet/servlet-api and EmbeddedSolrServer
 
-Unfortunately, EmbeddedSolrServer requires javax.servlet/servlet-api as an implicit dependency. Because of this, Flux adds this lib as a depedency.
+Unfortunately, EmbeddedSolrServer requires javax.servlet/servlet-api as an implicit dependency. Because of this, Flux adds this lib as a dependency.
 
   * http://wiki.apache.org/solr/Solrj#EmbeddedSolrServer
   * http://lucene.472066.n3.nabble.com/EmbeddedSolrServer-java-lang-NoClassDefFoundError-javax-servlet-ServletRequest-td483937.html
 
 ###Test
+
+For unit tests (which only verify that the functions return a value, and do not test actually against Solr):
+
 ```shell
 lein midje
 ```
+
+For integration tests, you'll need a Solr instance running on post 8983.  Since the current version of flux only allows you to create containers from the cluster API, you'll need to create the `flux-tests` container yourself.
+
+```solr create -c flux-tests```
+
+And then run as usual:
+
+```lein test```
+
 
 ## License
 
