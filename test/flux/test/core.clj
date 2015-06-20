@@ -24,7 +24,7 @@
 (defn get-test-docs
   "Returns a list of n test documents using an increasing number for their tags"
   [n]
-  (map #(hash-map :id (random-uuid) :title_t (str "Document " %) :tags_ss [(str "tag" %)]) (range n)))
+  (map #(hash-map :id (random-uuid) :title_t (str "Document " %) :tags_ss [(str "tag" %)] :internal_i %) (range n)))
 
 
 ;
@@ -119,6 +119,51 @@
       ))
   )
 
+(deftest basic-querying-and-sorting
+  (wipe-test-data)
+  (with-connection conn
+                   (add (get-test-docs 10))
+                   (commit))
+  (testing "Querying for all returns them in insert order"
+    (let [result (with-connection conn (query "*:*"))
+          docs   (get-in result [:response :docs])]
+      (is (= 10 (count docs)))
+      (doseq [i (range 10)]
+        (is (= i (:internal_i (nth docs i))))
+        (is (= [(str "tag" i)] (:tags_ss (nth docs i)))))))
+  (testing "We can request them in descending order"
+    (let [result (with-connection conn (query "*:*" {:sort "internal_i desc"}))
+          docs   (get-in result [:response :docs])]
+      (is (= 10 (count docs)))
+      (doseq [i (reverse (range 10))]
+        (is (= i (:internal_i (nth docs (- 9 i))))))))
+  (testing "Cannot sort by a text_general field"
+    (is (thrown? Throwable (with-connection conn (query "*:*" {:sort "title_t desc"})))))
+  (testing "Querying for a number of rows"
+    (let [result (with-connection conn (query "*:*" {:rows 6}))
+          docs   (get-in result [:response :docs])]
+      (is (= 10 (get-in result [:response :numFound])))
+      (is (= 0 (get-in result [:response :start])))
+      (is (= 6 (count docs)))
+      (doseq [i (range 6)]
+        (is (= [(str "tag" i)] (:tags_ss (nth docs i)))))))
+  (testing "Querying for a starting point"
+    (let [result (with-connection conn (query "*:*" {:start 3}))
+          docs   (get-in result [:response :docs])]
+      (is (= 10 (get-in result [:response :numFound])))
+      (is (= 3 (get-in result [:response :start])))
+      (is (= 7 (count docs)))
+      (doseq [i (range 7)]
+        (is (= [(str "tag" (+ i 3))] (:tags_ss (nth docs i)))))))
+  (testing "Querying for a starting point and a number of rows"
+    (let [result (with-connection conn (query "*:*" {:start 4 :rows 3}))
+          docs   (get-in result [:response :docs])]
+      (is (= 10 (get-in result [:response :numFound])))
+      (is (= 4 (get-in result [:response :start])))
+      (is (= 3 (count docs)))
+      (doseq [i (range 3)]
+        (is (= [(str "tag" (+ i 4))] (:tags_ss (nth docs i)))))))
+  )
 
 
 
