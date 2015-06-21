@@ -5,9 +5,9 @@
 
 
 
-;
-; General test functions
-;
+;;;;
+;;;; General test functions
+;;;;
 
 (def conn (http/create "http://localhost:8983/solr" :flux-tests))
 
@@ -21,15 +21,22 @@
   (java.util.UUID/randomUUID))
 
 
-(defn get-test-docs
+(defn range-docs
   "Returns a list of n test documents using an increasing number for their tags"
   [n]
   (map #(hash-map :id (random-uuid) :title_t (str "Document " %) :tags_ss [(str "tag" %)] :internal_i %) (range n)))
 
 
-;
-; Tests
-;
+
+(defn docs-from-titles
+  "Returns a list of test documents from a list of titles, using an increasing index for their tags"
+  [titles]
+  (map-indexed #(hash-map :id (random-uuid) :title_t %2 :internal_i %1) titles))
+
+
+;;;;
+;;;; Tests
+;;;;
 
 
 (deftest add-document
@@ -119,10 +126,11 @@
       ))
   )
 
+
 (deftest basic-querying-and-sorting
   (wipe-test-data)
   (with-connection conn
-                   (add (get-test-docs 10))
+                   (add (range-docs 10))
                    (commit))
   (testing "Querying for all returns them in insert order"
     (let [result (with-connection conn (query "*:*"))
@@ -166,4 +174,70 @@
   )
 
 
-
+(deftest basic-text-querying
+  (wipe-test-data)
+  (with-connection conn
+                   (add (docs-from-titles ["First piece"
+                                           "Second book"
+                                           "Last and Least important"
+                                           "Third piece"
+                                           "First after third"
+                                           "Last books"
+                                           "Last but definitely not least"
+                                           "Final"
+                                           "Last but not least"]))
+                   (commit))
+  (testing "Querying is not case sensitive"
+    (let [result (with-connection conn (query "title_t:first"))
+          docs   (get-in result [:response :docs])]
+      (is docs)
+      (is (= 0 (get-in result [:responseHeader :status])))
+      (is (= 2 (get-in result [:response :numFound])))
+      (is (= 2 (count docs)))
+      (is (= ["First piece" "First after third"] (map #(first (:title_t %)) docs)))))
+  (testing "Querying for a singular does not return a plural"
+    (let [result (with-connection conn (query "title_t:book"))
+          docs   (get-in result [:response :docs])]
+      (is docs)
+      (is (= 0 (get-in result [:responseHeader :status])))
+      (is (= 1 (get-in result [:response :numFound])))
+      (is (= 1 (count docs)))
+      (is (= ["Second book"] (map #(first (:title_t %)) docs)))))
+  (testing "We can do wildcard matching"
+    (let [result (with-connection conn (query "title_t:book*"))
+          docs   (get-in result [:response :docs])]
+      (is docs)
+      (is (= 0 (get-in result [:responseHeader :status])))
+      (is (= 2 (get-in result [:response :numFound])))
+      (is (= 2 (count docs)))
+      (is (= ["Second book" "Last books"] (map #(first (:title_t %)) docs)))))
+  (testing "If we pass two words with single quotes, they're matched independently"
+    ;; The query could be passed as 'after third' or 'after+third'
+    (let [result (with-connection conn (query "title_t:'after third'"))
+          docs   (get-in result [:response :docs])]
+      (is docs)
+      (is (= 0 (get-in result [:responseHeader :status])))
+      (is (= 2 (get-in result [:response :numFound])))
+      (is (= 2 (count docs)))
+      ;; Next assertion sorts them because they won't necessarily be returned in the same order they were inserted
+      (is (= ["First after third" "Third piece"] (sort (map #(first (:title_t %)) docs))))))
+  (testing "Double quotes are exact matches"
+    (let [result (with-connection conn (query "title_t:\"after third\""))
+          docs   (get-in result [:response :docs])]
+      (is docs)
+      (is (= 0 (get-in result [:responseHeader :status])))
+      (is (= 1 (get-in result [:response :numFound])))
+      (is (= ["First after third"] (map #(first (:title_t %)) docs)))))
+  (testing "We can do exact matches with proximity searching"
+    (let [result (with-connection conn (query "title_t:'after third'~0"))
+          docs   (get-in result [:response :docs])]
+      (is (= ["First after third"] (map #(first (:title_t %)) docs)))))
+  (testing "Proximity searches"
+    ;; Notice we use double quotes, otherwise it appears that the proximity is ignored
+    ;; We skip any titles where 'last' and 'least' appear more than two words away
+    ;; (there' a total of four with those words)
+    (let [result (with-connection conn (query "title_t:\"last least\"~2"))
+          docs   (get-in result [:response :docs])]
+      (is (= 2 (count docs)))
+      (is (= ["Last and Least important" "Last but not least"] (map #(first (:title_t %)) docs)))))
+  )
