@@ -12,6 +12,44 @@
 (def conn (http/create "http://localhost:8983/solr" :flux-tests))
 
 
+(def book-list [{:title_t     "Rainbows End"
+                 :author_s    "Vernor Vinge"
+                 :available_b true}
+                {:title_t     "A Fire Upon the Deep"
+                 :author_s    "Vernor Vinge"
+                 :available_b true}
+                {:title_t     "A Deepness in the Sky"
+                 :author_s    "Vernor Vinge"
+                 :available_b true}
+                {:title_t     "Use of Weapons"
+                 :author_s    "Iain M. Banks"
+                 :available_b true}
+                {:title_t     "War Made New: Weapons, Warriors, and the Making of the Modern World"
+                 :author_s    "Max Boot"
+                 :available_b false}
+                {:title_t     "The player of games"
+                 :author_s    "Iain M. Banks"
+                 :available_b true}
+                {:title_t     "James Bond: Choice of Weapons"
+                 :author_s    "Raymond Benson"
+                 :available_b true}
+                {:title_t     "The Black Company"
+                 :author_s    "Glen Cook"
+                 :available_b true}
+                {:title_t     "A Cruel Wind"
+                 :author_s    "Glen Cook"
+                 :available_b true}
+                {:title_t     "Reap the East Wind"
+                 :author_s    "Glen Cook"
+                 :available_b true}
+                {:title_t     "The Silver Spike"
+                 :author_s    "Glen Cook"
+                 :available_b false}
+                {:title_t     "Black Sands"
+                 :author_s    "Blair Reynolds"
+                 :available_b false}
+                ])
+
 (defn wipe-test-data []
   (with-connection conn
                    (delete-by-query "*:*")
@@ -252,43 +290,7 @@
 (deftest query-on-multiple-fields
   (wipe-test-data)
   (with-connection conn
-                   (add [{:title_t     "Rainbows End"
-                          :author_s    "Vernor Vinge"
-                          :available_b true}
-                         {:title_t     "A Fire Upon the Deep"
-                          :author_s    "Vernor Vinge"
-                          :available_b true}
-                         {:title_t     "A Deepness in the Sky"
-                          :author_s    "Vernor Vinge"
-                          :available_b true}
-                         {:title_t     "Use of Weapons"
-                          :author_s    "Iain M. Banks"
-                          :available_b true}
-                         {:title_t     "War Made New: Weapons, Warriors, and the Making of the Modern World"
-                          :author_s    "Max Boot"
-                          :available_b false}
-                         {:title_t     "The player of games"
-                          :author_s    "Iain M. Banks"
-                          :available_b true}
-                         {:title_t     "James Bond: Choice of Weapons"
-                          :author_s    "Raymond Benson"
-                          :available_b true}
-                         {:title_t     "The Black Company"
-                          :author_s    "Glen Cook"
-                          :available_b true}
-                         {:title_t     "A Cruel Wind"
-                          :author_s    "Glen Cook"
-                          :available_b true}
-                         {:title_t     "Reap the East Wind"
-                          :author_s    "Glen Cook"
-                          :available_b true}
-                         {:title_t     "The Silver Spike"
-                          :author_s    "Glen Cook"
-                          :available_b false}
-                         {:title_t     "Black Sands"
-                          :author_s    "Blair Reynolds"
-                          :available_b false}
-                         ])
+                   (add book-list)
                    (commit))
   (testing "String fields only do exact matches"
     (let [result (with-connection conn (query "author_s:Iain"))]
@@ -437,3 +439,25 @@
       (doseq [i (nthrest initial-docs 3)]
         (is (not-empty (filter #(= (:id i) (:id %)) docs)))))
     ))
+
+
+(deftest test-boosting
+  (wipe-test-data)
+  (with-connection conn
+                   (add book-list)
+                   (commit))
+  (let [result-title  (with-connection conn (query "title_t:black^1.5 OR author_s:\"Glen Cook\""))
+        docs-title    (get-in result-title [:response :docs])
+        result-author (with-connection conn (query "title_t:black OR author_s:\"Glen Cook\"^2"))
+        docs-author   (get-in result-author [:response :docs])
+        ]
+    (is (= 5 (count docs-title)))
+    (is (= 5 (count docs-author)))
+    ;; The lists are not returned on the same order because of different score boosting
+    (is (not= docs-title docs-author))
+    ;; The last item on the author-boosted list is Blair Reynolds, because Glen Cook was boosted
+    (is (= "Blair Reynolds" (:author_s (last docs-author))))
+    ;; The last item on the title-boosted list is Glen Cook, because "black" was boosted as a search term
+    (is (= "Glen Cook" (:author_s (last docs-title))))
+    )
+  )
