@@ -241,3 +241,120 @@
       (is (= 2 (count docs)))
       (is (= ["Last and Least important" "Last but not least"] (map #(first (:title_t %)) docs)))))
   )
+
+(deftest query-on-multiple-fields
+  (wipe-test-data)
+  (with-connection conn
+                   (add [{:title_t     "Rainbows End"
+                          :author_s    "Vernor Vinge"
+                          :available_b true}
+                         {:title_t     "A Fire Upon the Deep"
+                          :author_s    "Vernor Vinge"
+                          :available_b true}
+                         {:title_t     "A Deepness in the Sky"
+                          :author_s    "Vernor Vinge"
+                          :available_b true}
+                         {:title_t     "Use of Weapons"
+                          :author_s    "Iain M. Banks"
+                          :available_b true}
+                         {:title_t     "War Made New: Weapons, Warriors, and the Making of the Modern World"
+                          :author_s    "Max Boot"
+                          :available_b false}
+                         {:title_t     "The player of games"
+                          :author_s    "Iain M. Banks"
+                          :available_b true}
+                         {:title_t     "James Bond: Choice of Weapons"
+                          :author_s    "Raymond Benson"
+                          :available_b true}
+                         {:title_t     "The Black Company"
+                          :author_s    "Glen Cook"
+                          :available_b true}
+                         {:title_t     "A Cruel Wind"
+                          :author_s    "Glen Cook"
+                          :available_b true}
+                         {:title_t     "Reap the East Wind"
+                          :author_s    "Glen Cook"
+                          :available_b true}
+                         {:title_t     "The Silver Spike"
+                          :author_s    "Glen Cook"
+                          :available_b false}
+                         {:title_t     "Black Sands"
+                          :author_s    "Blair Reynolds"
+                          :available_b false}
+                         ])
+                   (commit))
+  (testing "String fields only do exact matches"
+    (let [result (with-connection conn (query "author_s:Iain"))]
+      (is result)
+      (is (= 0 (get-in result [:response :numFound])))
+      (is (= 0 (get-in result [:responseHeader :status])))
+      )
+    ;; For the next query, single or double quotes are interchangeable
+    (let [result (with-connection conn (query "author_s:'Iain M. Banks'"))]
+      (is result)
+      (is (= 2 (get-in result [:response :numFound])))
+      (is (= 0 (get-in result [:responseHeader :status])))
+      ))
+  (testing "Querying for title only returns matches regardless of the author"
+    (let [result (with-connection conn (query "title_t:black"))
+          docs   (get-in result [:response :docs])]
+      (is result)
+      (is (= 2 (get-in result [:response :numFound])))
+      (is (= 0 (get-in result [:responseHeader :status])))
+      (are [title author] (not-empty (filter #(and (= [title] (:title_t %))
+                                                   (= author (:author_s %)))
+                                             docs))
+                          "The Black Company" "Glen Cook"
+                          "Black Sands" "Blair Reynolds")))
+  (testing "Querying for title and author returns only that exact match"
+    ;; Few peculiarities to be aware of here:
+    ;; - If the AND is lowercase it seems to be ignored, or act as an OR
+    ;; - If the name is in single quotes, no results will be returned
+    ;; This is pretty much crying out for a query builder
+    (let [result (with-connection conn (query "title_t:black AND author_s:\"Glen Cook\""))
+          docs   (get-in result [:response :docs])]
+      (is result)
+      (is (= 1 (get-in result [:response :numFound])))
+      (is (= 0 (get-in result [:responseHeader :status])))
+      (are [title author] (not-empty (filter #(and (= [title] (:title_t %))
+                                                   (= author (:author_s %)))
+                                             docs))
+                          "The Black Company" "Glen Cook")))
+  (testing "We can query for a title OR an author"
+    (let [result (with-connection conn (query "title_t:black OR author_s:\"Glen Cook\""))
+          docs   (get-in result [:response :docs])]
+      (is result)
+      (is (= 5 (get-in result [:response :numFound])))
+      (is (= 0 (get-in result [:responseHeader :status])))
+      (are [title author] (not-empty (filter #(and (= [title] (:title_t %))
+                                                   (= author (:author_s %)))
+                                             docs))
+                          "The Black Company" "Glen Cook"
+                          "Black Sands" "Blair Reynolds"
+                          "A Cruel Wind" "Glen Cook"
+                          "Reap the East Wind" "Glen Cook"
+                          "The Silver Spike" "Glen Cook"
+                          )))
+  (testing "We can query for multiple fields, including booleans"
+    (let [result (with-connection conn (query "(title_t:black OR author_s:\"Glen Cook\") AND available_b:true"))
+          docs    (get-in result [:response :docs])]
+      (is (= 3 (get-in result [:response :numFound])))
+      (is (= 0 (get-in result [:responseHeader :status])))
+      (are [title author] (not-empty (filter #(and (= [title] (:title_t %))
+                                                   (= author (:author_s %)))
+                                             docs))
+                          "The Black Company" "Glen Cook"
+                          "A Cruel Wind" "Glen Cook"
+                          "Reap the East Wind" "Glen Cook"
+                          )))
+  (testing "We can exclude words"
+    (let [result (with-connection conn (query "title_t:weapons AND -title_t:bond AND available_b:true"))
+          docs   (get-in result [:response :docs])]
+      (is result)
+      (is (= 1 (get-in result [:response :numFound])))
+      (is (= 0 (get-in result [:responseHeader :status])))
+      (are [title author] (not-empty (filter #(and (= [title] (:title_t %))
+                                                   (= author (:author_s %)))
+                                             docs))
+                          "Use of Weapons" "Iain M. Banks")))
+  )
