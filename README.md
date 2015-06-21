@@ -1,12 +1,12 @@
 # flux
 
-A Clojure based Solr client. Current Apache Solr version support is `4.9.0`.
+A Clojure based Solr client. Current Apache Solr version support is `5.2.0`.
 
 ## Installation (Leiningen)
 
 To include the Flux library, add the following to your `:dependencies`:
 
-    [com.codesignals/flux "0.6.0"]
+    [com.codesignals/flux "0.7.0-SNAPSHOT"]
 
 ## Usage
 
@@ -171,7 +171,7 @@ Unfortunately, EmbeddedSolrServer requires javax.servlet/servlet-api as an impli
   * http://wiki.apache.org/solr/Solrj#EmbeddedSolrServer
   * http://lucene.472066.n3.nabble.com/EmbeddedSolrServer-java-lang-NoClassDefFoundError-javax-servlet-ServletRequest-td483937.html
 
-### Test
+## Test
 
 For unit tests (which only verify that the functions return a value, and do not test actually against Solr):
 
@@ -179,7 +179,7 @@ For unit tests (which only verify that the functions return a value, and do not 
 lein midje
 ```
 
-For integration tests, you'll need a Solr instance running on post 8983.  Since the current version of flux only allows you to create containers from the cluster API, you'll need to create the `flux-tests` container yourself.
+For integration tests, you'll need a Solr instance running on post 8983.  Since the current version of flux only allows you to create cores from the cluster API, you'll need to create the `flux-tests` core yourself.
 
 ```shell
 solr create -c flux-tests
@@ -190,6 +190,9 @@ And then run as usual:
 ```shell
 lein test
 ```
+
+I've run the tests against Solr 5.2.0 on OSX.
+
 
 
 ## License
