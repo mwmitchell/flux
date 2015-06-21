@@ -182,6 +182,7 @@
                                            "Last and Least important"
                                            "Third piece"
                                            "First after third"
+                                           "Third after that"
                                            "Last books"
                                            "Last but definitely not least"
                                            "Final"
@@ -217,20 +218,16 @@
           docs   (get-in result [:response :docs])]
       (is docs)
       (is (= 0 (get-in result [:responseHeader :status])))
-      (is (= 2 (get-in result [:response :numFound])))
-      (is (= 2 (count docs)))
+      (is (= 3 (get-in result [:response :numFound])))
+      (is (= 3 (count docs)))
       ;; Next assertion sorts them because they won't necessarily be returned in the same order they were inserted
-      (is (= ["First after third" "Third piece"] (sort (map #(first (:title_t %)) docs))))))
+      (is (= ["First after third" "Third after that" "Third piece"] (sort (map #(first (:title_t %)) docs))))))
   (testing "Double quotes are exact matches"
     (let [result (with-connection conn (query "title_t:\"after third\""))
           docs   (get-in result [:response :docs])]
       (is docs)
       (is (= 0 (get-in result [:responseHeader :status])))
       (is (= 1 (get-in result [:response :numFound])))
-      (is (= ["First after third"] (map #(first (:title_t %)) docs)))))
-  (testing "We can do exact matches with proximity searching"
-    (let [result (with-connection conn (query "title_t:'after third'~0"))
-          docs   (get-in result [:response :docs])]
       (is (= ["First after third"] (map #(first (:title_t %)) docs)))))
   (testing "Proximity searches"
     ;; Notice we use double quotes, otherwise it appears that the proximity is ignored
@@ -240,6 +237,15 @@
           docs   (get-in result [:response :docs])]
       (is (= 2 (count docs)))
       (is (= ["Last and Least important" "Last but not least"] (map #(first (:title_t %)) docs)))))
+  (testing "We can do exact matches with proximity searching"
+    (let [result (with-connection conn (query "title_t:\"after third\"~0"))
+          docs   (get-in result [:response :docs])]
+      (is (= ["First after third"] (map #(first (:title_t %)) docs)))))
+  (testing "Word transpositions are returned with proximity searches"
+    (let [result (with-connection conn (query "title_t:\"after third\"~2"))
+          docs   (get-in result [:response :docs])]
+      (is (= ["First after third" "Third after that"] (map #(first (:title_t %)) docs)))))
+
   )
 
 (deftest query-on-multiple-fields
