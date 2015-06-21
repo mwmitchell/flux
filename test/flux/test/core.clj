@@ -91,9 +91,9 @@
       ; Check the documents
       (let [docs (get-in query-result [:response :docs])]
         (is (= 3 (count docs)))
-        (are [title tags] (filter #(and (= [title] (:title_t %))
-                                        (= tags (:tags_ss %)))
-                                  docs)
+        (are [title tags] (not-empty (filter #(and (= [title] (:title_t %))
+                                                   (= tags (:tags_ss %)))
+                                             docs))
                           "A second document" ["tag2" "tag4"]
                           "And a third document" ["tag3"]
                           "tagless" nil))
@@ -105,7 +105,7 @@
                                                :tags_ss ["independent" "new1"]}])
                                         (add [{:id      (random-uuid)
                                                :title_t "New 2"
-                                               :tags    ["independent" "new2"]}])
+                                               :tags_ss ["independent" "new2"]}])
                                         (add [{:id_ss   (random-uuid)
                                                :title_t "New 3"
                                                :tags_ss ["independent" "new3"]}])
@@ -117,9 +117,9 @@
       ; Check the documents
       (let [docs (get-in query-result [:response :docs])]
         (is (= 6 (count docs)))
-        (are [title tags] (filter #(and (= [title] (:title_t %))      ; See above about text_general fields
-                                        (= tags (:tags_ss %)))
-                                  docs)
+        (are [title tags] (not-empty (filter #(and (= [title] (:title_t %)) ; See above about text_general fields
+                                                   (= tags (:tags_ss %)))
+                                             docs))
                           "New 1" ["independent" "new1"]
                           "New 2" ["independent" "new2"]
                           "New 3" ["independent" "new3"]))
