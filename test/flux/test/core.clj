@@ -18,7 +18,7 @@
                    (commit)))
 
 (defn random-uuid []
-  (java.util.UUID/randomUUID))
+  (.toString (java.util.UUID/randomUUID)))
 
 
 (defn range-docs
