@@ -397,3 +397,43 @@
     (doseq [i (range 15 31)]
       (is (not-empty (filter #(= i (:internal_i %)) docs)))))
   )
+
+
+(deftest test-delete-by-id
+  (wipe-test-data)
+  (let [initial-docs (range-docs 10)]
+    (with-connection conn
+                     (add initial-docs)
+                     (commit))
+    ;; Confirm we created them all
+    (let [result (with-connection conn (query "*:*"))]
+      (is (= 10 (count (get-in result [:response :docs])))))
+    ;; Let's remove number 3
+    (let [to-delete  (nth initial-docs 2)
+          del-result (with-connection conn
+                                      (delete-by-id [(:id to-delete)])
+                                      (commit))
+          get-result (with-connection conn (query "*:*"))
+          docs       (get-in get-result [:response :docs])]
+      (is del-result)
+      (is get-result)
+      (is (= 9 (count docs)))
+      (is (empty? (filter #(= (:id to-delete) (:id %)) docs))))
+    ;; Let's remove a range
+    (let [to-delete  (take 3 initial-docs)
+          del-result (with-connection conn
+                                      (delete-by-id (map :id to-delete))
+                                      (commit))
+          get-result (with-connection conn (query "*:*"))
+          docs       (get-in get-result [:response :docs])]
+      (is del-result)
+      (is get-result)
+      ;; Verify we still have 7 - we deleted only 2, because the third one was already gone
+      (is (= 7 (count docs)))
+      ;; The deleted documents are not returned
+      (doseq [i to-delete]
+        (is (empty? (filter #(= (:id i) (:id %)) docs))))
+      ;; All other documents are there
+      (doseq [i (nthrest initial-docs 3)]
+        (is (not-empty (filter #(= (:id i) (:id %)) docs)))))
+    ))
