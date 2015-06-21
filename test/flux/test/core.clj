@@ -248,6 +248,7 @@
 
   )
 
+
 (deftest query-on-multiple-fields
   (wipe-test-data)
   (with-connection conn
@@ -343,7 +344,7 @@
                           )))
   (testing "We can query for multiple fields, including booleans"
     (let [result (with-connection conn (query "(title_t:black OR author_s:\"Glen Cook\") AND available_b:true"))
-          docs    (get-in result [:response :docs])]
+          docs   (get-in result [:response :docs])]
       (is (= 3 (get-in result [:response :numFound])))
       (is (= 0 (get-in result [:responseHeader :status])))
       (are [title author] (not-empty (filter #(and (= [title] (:title_t %))
@@ -363,4 +364,36 @@
                                                    (= author (:author_s %)))
                                              docs))
                           "Use of Weapons" "Iain M. Banks")))
+  )
+
+
+(deftest query-ranges
+  (wipe-test-data)
+  (with-connection conn
+                   (add (range-docs 31))
+                   (commit))
+  ;; Querying from * to N gets all x such that x <= N
+  (let [result (with-connection conn (query "internal_i:[* TO 5]"))
+        docs   (get-in result [:response :docs])]
+    (is (= 6 (count docs)))
+    (doseq [i (range 6)]
+      (is (not-empty (filter #(= i (:internal_i %)) docs)))))
+  ;; Querying from N to M gets all x such that N <= x <= M
+  (let [result (with-connection conn (query "internal_i:[9 TO 14]"))
+        docs   (get-in result [:response :docs])]
+    (is (= 6 (count docs)))
+    (doseq [i (range 9 15)]
+      (is (not-empty (filter #(= i (:internal_i %)) docs)))))
+  ;; Querying from N to * returns all x where N <= x, but caps it at 10 rows by default
+  (let [result (with-connection conn (query "internal_i:[15 TO *]"))
+        docs   (get-in result [:response :docs])]
+    (is (= 10 (count docs)))
+    (doseq [i (range 15 24)]
+      (is (not-empty (filter #(= i (:internal_i %)) docs)))))
+  ;; Querying from N to * returns all x where N <= x
+  (let [result (with-connection conn (query "internal_i:[15 TO *]" {:rows 100}))
+        docs   (get-in result [:response :docs])]
+    (is (= 16 (count docs)))
+    (doseq [i (range 15 31)]
+      (is (not-empty (filter #(= i (:internal_i %)) docs)))))
   )
