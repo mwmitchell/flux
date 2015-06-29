@@ -1,16 +1,16 @@
 # flux
 
-A Clojure based Solr client. Current Apache Solr version support is `4.9.0`.
+A Clojure based Solr client. Current Apache Solr version support is `5.2.0`.
 
 ## Installation (Leiningen)
 
 To include the Flux library, add the following to your `:dependencies`:
 
-    [com.codesignals/flux "0.6.0"]
+    [com.codesignals/flux "0.7.0-SNAPSHOT"]
 
 ## Usage
 
-###Http
+### Http
 
 ```clojure
 (require '[flux.http :as http])
@@ -18,7 +18,7 @@ To include the Flux library, add the following to your `:dependencies`:
 (def conn (http/create "http://localhost:8983/solr" :collection1))
 ```
 
-###Cloud
+### Cloud
 Create a connection to SolrCloud using one zk host:
 
 ```clojure
@@ -124,7 +124,7 @@ Wait for all replicas of a given collection hosted by a particular host/port to 
 (wait-until-active conn "my-solr-collection" "host1:8983")
 ```
 
-###Embedded
+### Embedded
 
 ```clojure
 (require '[flux.embedded :as embedded])
@@ -132,7 +132,7 @@ Wait for all replicas of a given collection hosted by a particular host/port to 
 (def cc (embedded/create-core-container "path/to/solr-home" "path/to/solr.xml"))
 ```
 
-####Core auto-discovery
+### Core auto-discovery
 Flux also supports `core.properties`. Just give `create-core` the solr-home path as the only argument.
 
   Note: It's important to call the `load` method on the resulting `CoreContainer` instance:
@@ -148,7 +148,7 @@ Now create the embedded server instance:
 (def conn (embedded/create cc :collection1))
 ```
 
-###Client
+### Client
 Once a connection as been created, use the `with-connection` macro to wrap client calls:
 
 ```clojure
@@ -164,17 +164,36 @@ Once a connection as been created, use the `with-connection` macro to wrap clien
       (q/create-query-request :post "/docs" {:q "etc"}))
 ```
 
-###javax.servlet/servlet-api and EmbeddedSolrServer
+### javax.servlet/servlet-api and EmbeddedSolrServer
 
-Unfortunately, EmbeddedSolrServer requires javax.servlet/servlet-api as an implicit dependency. Because of this, Flux adds this lib as a depedency.
+Unfortunately, EmbeddedSolrServer requires javax.servlet/servlet-api as an implicit dependency. Because of this, Flux adds this lib as a dependency.
 
   * http://wiki.apache.org/solr/Solrj#EmbeddedSolrServer
   * http://lucene.472066.n3.nabble.com/EmbeddedSolrServer-java-lang-NoClassDefFoundError-javax-servlet-ServletRequest-td483937.html
 
-###Test
+## Test
+
+For unit tests (which only verify that the functions return a value, and do not test actually against Solr):
+
 ```shell
 lein midje
 ```
+
+For integration tests, you'll need a Solr instance running on post 8983.  Since the current version of flux only allows you to create cores from the cluster API, you'll need to create the `flux-tests` core yourself.
+
+```shell
+solr create -c flux-tests
+```
+
+And then run as usual:
+
+```shell
+lein test
+```
+
+I've run the tests against Solr 5.2.0 on OSX.
+
+
 
 ## License
 

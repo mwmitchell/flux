@@ -12,3 +12,4 @@ pom.xml
 /pom.xml.asc
 .idea
 *.iml
+.lein-failures
