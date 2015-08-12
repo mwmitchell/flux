@@ -23,7 +23,7 @@ Create a connection to SolrCloud using one zk host:
 
 ```clojure
 (require '[flux.cloud :as cloud]
-          [flux.collections :as cloud-api)
+         '[flux.collections :as cloud-api)
 
 (def conn (cloud/create "zk1:2181"))
 ```
