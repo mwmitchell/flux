@@ -9,17 +9,8 @@
 
 (defmulti ->clojure class)
 
-(defmethod ->clojure SimpleOrderedMap [^SimpleOrderedMap obj]
-  (reduce
-   (fn [acc ^java.util.Map$Entry o]
-     (assoc acc (keyword (.getKey o)) (->clojure (.getValue o))))
-   {}
-   (iterator-seq (.iterator obj))))
-
 (defmethod ->clojure NamedList [^NamedList obj]
-  (mapv
-   (fn [^java.util.Map$Entry o] (vector (.getKey o) (->clojure (.getValue o))))
-   (iterator-seq (.iterator obj))))
+  (into {} (for [[k v] obj] [(keyword k) (->clojure v)])))
 
 (defmethod ->clojure ArrayList [obj]
   (mapv ->clojure obj))
@@ -48,6 +39,9 @@
      (assoc acc (keyword o) (.getFieldValue obj o)))
    {}
    (.getFieldNames obj)))
+
+(defmethod ->clojure java.util.LinkedHashMap [obj]
+  (into {} (for [[k v] obj] [(keyword k) (->clojure v)])))
 
 (defmethod ->clojure :default [obj]
   obj)
