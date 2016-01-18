@@ -1,6 +1,6 @@
 # flux
 
-A Clojure based Solr client. Current Apache Solr version support is `4.9.0`.
+A Clojure based Solr client. The latest stable version of flux is 0.6.0, which supports Solr `4.9.0`.
 
 ## Installation (Leiningen)
 
@@ -163,13 +163,6 @@ Once a connection as been created, use the `with-connection` macro to wrap clien
     (flux/request
       (q/create-query-request :post "/docs" {:q "etc"}))
 ```
-
-###javax.servlet/servlet-api and EmbeddedSolrServer
-
-Unfortunately, EmbeddedSolrServer requires javax.servlet/servlet-api as an implicit dependency. Because of this, Flux adds this lib as a depedency.
-
-  * http://wiki.apache.org/solr/Solrj#EmbeddedSolrServer
-  * http://lucene.472066.n3.nabble.com/EmbeddedSolrServer-java-lang-NoClassDefFoundError-javax-servlet-ServletRequest-td483937.html
 
 ###Test
 ```shell
