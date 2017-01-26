@@ -1,14 +1,12 @@
 (ns flux.update
-  (import [org.apache.solr.common SolrInputDocument]))
+  (:import (org.apache.solr.common SolrInputDocument
+                                   SolrInputField)))
 
 ;; NOTE: The result of this function is a SolrInputDocument
 ;; which throws an exception when printed!
 (defn create-doc ^SolrInputDocument [document-map]
   (reduce-kv (fn [^SolrInputDocument doc k v]
                (if (map? v)
-                 (let [m (doto (java.util.HashMap.)
-                           (.put (name (key (first v))) (val (first v))))]
-                   (doto doc (.addField (name k) m))
-                   doc)
+                 (doto doc (.addChildDocument (create-doc v)))
                  (doto doc (.addField (name k) v))))
-             (SolrInputDocument.) document-map))
+             (SolrInputDocument. (java.util.HashMap.)) document-map))

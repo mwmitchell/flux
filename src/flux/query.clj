@@ -8,7 +8,11 @@
    :post SolrRequest$METHOD/POST})
 
 (defn- format-param [p]
-  (if (keyword? p) (name p) (str p)))
+  (cond
+    (keyword? p) (name p)
+    (map-entry? p) (let [[k v] p]
+                     (str (name k) ":" v))
+    :default (str p)))
 
 (defn- format-values [v]
   (into-array (mapv format-param (if (coll? v) v [v]))))
