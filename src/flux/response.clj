@@ -1,9 +1,11 @@
 (ns flux.response
-  (:import [org.apache.solr.client.solrj SolrResponse]
-           [org.apache.solr.common.util NamedList SimpleOrderedMap]
-           [org.apache.solr.common SolrDocumentList SolrDocument]
-           [org.apache.solr.common SolrInputDocument]
-           [java.util ArrayList]))
+  (:import (org.apache.solr.client.solrj SolrResponse)
+           (org.apache.solr.common.util NamedList
+                                        SimpleOrderedMap)
+           (org.apache.solr.common SolrDocumentList
+                                   SolrDocument)
+           (org.apache.solr.common SolrInputDocument)
+           (java.util ArrayList)))
 
 ;; TODO: Rename this ns to something like "conversion", not "response"
 

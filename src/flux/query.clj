@@ -1,7 +1,7 @@
 (ns flux.query
-  (import [org.apache.solr.common.params MultiMapSolrParams]
-          [org.apache.solr.client.solrj.request QueryRequest]
-          [org.apache.solr.client.solrj SolrRequest$METHOD]))
+  (:import (org.apache.solr.common.params MultiMapSolrParams)
+           (org.apache.solr.client.solrj.request QueryRequest)
+           (org.apache.solr.client.solrj SolrRequest$METHOD)))
 
 (def method-map
   {:get SolrRequest$METHOD/GET

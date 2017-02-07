@@ -1,5 +1,5 @@
 (ns flux.cloud
-  (import [org.apache.solr.client.solrj.impl CloudSolrClient]))
+  :import (org.apache.solr.client.solrj.impl CloudSolrClient))
 
 (defn create
   ([zk-hosts]

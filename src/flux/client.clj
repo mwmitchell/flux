@@ -1,9 +1,9 @@
 (ns flux.client
-  (require [flux.update :refer [create-doc]]
-           [flux.query :refer [create-query]]
-           [flux.response :refer [->clojure]])
-  (import [org.apache.solr.client.solrj SolrClient]
-          [org.apache.solr.common SolrInputDocument]))
+  (:require [flux.update   :refer [create-doc]]
+            [flux.query    :refer [create-query]]
+            [flux.response :refer [->clojure]])
+  (:import (org.apache.solr.client.solrj SolrClient)
+           (org.apache.solr.common SolrInputDocument)))
 
 (defn query [^SolrClient solr-server query & [options]]
   (->clojure (.query solr-server (create-query query options))))
