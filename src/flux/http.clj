@@ -1,5 +1,5 @@
 (ns flux.http
-  (import [org.apache.solr.client.solrj.impl HttpSolrServer]))
+  (:import (org.apache.solr.client.solrj.impl HttpSolrClient)))
 
 (defn create [base-url core-name]
-  (HttpSolrServer. (str base-url "/" (name core-name))))
+  (HttpSolrClient. (str base-url "/" (name core-name))))
