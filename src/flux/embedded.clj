@@ -1,9 +1,8 @@
 (ns flux.embedded
-  (import [java.io File]
-          [org.apache.solr.client.solrj.embedded EmbeddedSolrServer]
-          [org.apache.solr.core CoreContainer]
-          [java.nio.file Paths]
-          [java.net URI]))
+  (:import [java.io File]
+           [org.apache.solr.client.solrj.embedded EmbeddedSolrServer]
+           [org.apache.solr.core CoreContainer]
+           [java.nio.file Paths]))
 
 (defn- str->path [str-path]
   (-> str-path File. .toURI Paths/get))
@@ -22,8 +21,8 @@
    (CoreContainer. solr-home))
   ([^String solr-home-path ^String solr-config-path]
    (CoreContainer/createAndLoad
-    (str->path solr-home-path)
-    (str->path solr-config-path))))
+     (str->path solr-home-path)
+     (str->path solr-config-path))))
 
 (defn create [^CoreContainer core-container core-name]
   {:pre [(some #(% core-name) [string? keyword?])]}

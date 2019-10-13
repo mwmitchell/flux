@@ -1,5 +1,5 @@
 (ns flux.core
-  (require [flux.client]))
+  (:require [flux.client]))
 
 (def ^:dynamic *connection*)
 
