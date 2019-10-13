@@ -1,5 +1,5 @@
 (ns flux.update
-  (import [org.apache.solr.common SolrInputDocument]))
+  (:import [org.apache.solr.common SolrInputDocument]))
 
 ;; NOTE: The result of this function is a SolrInputDocument
 ;; which throws an exception when printed!
