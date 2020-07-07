@@ -1,6 +1,6 @@
 (ns flux.response
   (:import [org.apache.solr.client.solrj SolrResponse]
-           [org.apache.solr.common.util NamedList SimpleOrderedMap]
+           [org.apache.solr.common.util NamedList]
            [org.apache.solr.common SolrDocumentList SolrDocument]
            [org.apache.solr.common SolrInputDocument]
            [java.util ArrayList]))

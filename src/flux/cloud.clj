@@ -1,10 +1,10 @@
 (ns flux.cloud
-  (import [org.apache.solr.client.solrj.impl CloudSolrServer]))
+  (:import [org.apache.solr.client.solrj.impl CloudSolrClient$Builder]))
 
 (defn create
   ([zk-hosts]
-   (CloudSolrServer. zk-hosts))
+   (CloudSolrClient$Builder. zk-hosts))
   ([zk-hosts default-collection]
-   (let [server (CloudSolrServer. zk-hosts)]
-     (.setDefaultCollection server default-collection)
-     server)))
+   (let [client (create zk-hosts)]
+     (.setDefaultCollection client default-collection)
+     client)))

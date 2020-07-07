@@ -1,4 +1,4 @@
-(ns flux.unit.response
+(ns src.flux.response
   (:require [flux.update :as update]
             [flux.response :refer :all]
             [midje.sweet :refer :all]))

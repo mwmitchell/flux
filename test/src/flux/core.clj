@@ -1,4 +1,4 @@
-(ns flux.unit.core
+(ns src.flux.core
   (:require [flux.client :as client]
             [flux.core :refer :all]
             [midje.sweet :refer :all]))
