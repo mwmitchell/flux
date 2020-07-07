@@ -1,12 +1,12 @@
 # flux
 
-A Clojure based Solr client. The latest stable version of flux is 0.6.0, which supports Solr `4.9.0`.
+A Clojure based Solr client. The latest stable version of flux is 0.6.2, which supports Solr `8.5.2`.
 
 ## Installation (Leiningen)
 
 To include the Flux library, add the following to your `:dependencies`:
 
-    [com.codesignals/flux "0.6.0"]
+    [com.codesignals/flux "0.6.2"]
 
 ## Usage
 
