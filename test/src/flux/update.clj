@@ -1,5 +1,5 @@
-(ns flux.unit.update
-  (:require [flux.update :refer :all]
+(ns src.flux.update
+  (:require [flux.update :refer :all]            
             [midje.sweet :refer :all]))
 
 (fact "create-doc"

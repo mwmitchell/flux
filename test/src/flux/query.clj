@@ -1,4 +1,4 @@
-(ns flux.unit.query
+(ns src.flux.query
   (:require [flux.query :refer :all]
             [midje.sweet :refer :all]))
 

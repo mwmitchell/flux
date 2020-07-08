@@ -1,5 +1,9 @@
 (ns flux.update
-  (import [org.apache.solr.common SolrInputDocument]))
+  (:import [org.apache.solr.common SolrInputDocument]))
+
+;; Checking the docs the SolrInputDocument required a none
+;; empty ctor already since 7.0.0 
+;; https://lucene.apache.org/solr/8_5_2/solr-solrj/index.html?org/apache/solr/common/SolrInputDocument.html
 
 ;; NOTE: The result of this function is a SolrInputDocument
 ;; which throws an exception when printed!
@@ -11,4 +15,4 @@
                    (doto doc (.addField (name k) m))
                    doc)
                  (doto doc (.addField (name k) v))))
-             (SolrInputDocument.) document-map))
+             (SolrInputDocument. (java.util.LinkedHashMap.)) document-map))
