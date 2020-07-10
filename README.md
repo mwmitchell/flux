@@ -1,16 +1,5 @@
-# star
+# flux
 
-<<<<<<< Updated upstream
-A Clojure library designed to ... well, that part is up to you.
-
-## Usage
-
-FIXME
-
-## License
-
-Copyright © 2013 FIXME
-=======
 A Clojure based Solr client. The latest stable version of flux is 0.6.3, which supports Solr `8.5.2`.
 
 ## Installation (Leiningen)
@@ -192,6 +181,5 @@ lein midje
 ## License
 
 Copyright © 2013-2020 Matt Mitchell
->>>>>>> Stashed changes
 
 Distributed under the Eclipse Public License, the same as Clojure.
