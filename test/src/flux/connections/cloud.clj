@@ -23,5 +23,5 @@
 (fact "ctor-test-cloud"
       (type (set-default-connection (create ["localhost:2181"] "/"))) =>
       org.apache.solr.client.solrj.impl.CloudSolrClient
-      (type (set-default-connection (create ["localhost:2181"] "/" :new_core)))
+      (type (set-default-connection (create ["localhost:2181"] "/" :flux_test)))
       => org.apache.solr.client.solrj.impl.CloudSolrClient)
