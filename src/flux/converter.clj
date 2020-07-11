@@ -5,6 +5,7 @@
            [org.apache.solr.common SolrInputDocument]
            [java.util ArrayList]))
 
+;; Stores the setup of output choosen to be strings or parsed
 (defonce string-only? (atom false))
 
 (defn set-stringoutput-only 
@@ -17,7 +18,13 @@
   (when (boolean? bool)
     (reset! string-only? bool)))
 
-(defmulti ->clojure class)
+(defmulti ->clojure 
+  "Converts the solr Data back to clojure collections
+   
+   class
+   : can be NamedList, SolrDocumentList, SolrDocument, SolrResponse, SolrInputDocument,
+     java.util.LinkedHashMap, String or whatever (whatever is returned only)"
+  class)
 
 (defmethod ->clojure NamedList [^NamedList obj]
   (into {} (for [[k v] obj] [(keyword k) (->clojure v)])))
@@ -44,17 +51,22 @@
   (->clojure (.getResponse obj)))
 
 (defmethod ->clojure SolrInputDocument [^SolrInputDocument obj]
-  (reduce
-   (fn [acc o]
-     (assoc acc (keyword o) (.getFieldValue obj o)))
-   {}
-   (.getFieldNames obj)))
+  (let [fields 
+        (reduce
+         (fn [acc o]
+           (assoc acc (keyword o) (.getFieldValue obj o)))
+         {}
+         (.getFieldNames obj))
+        children (.getChildDocuments obj)]
+    (if (nil? children)
+      fields
+      (assoc fields :__childDocuments (map ->clojure children)))))
 
 (defmethod ->clojure java.util.LinkedHashMap [obj]
   (into {} (for [[k v] obj] [(keyword k) (->clojure v)])))
 
 (defmethod ->clojure String [obj]
-  (if string-only? 
+  (if @string-only? 
     obj 
     (try
       (Long/parseLong obj)

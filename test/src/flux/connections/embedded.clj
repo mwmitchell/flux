@@ -1,32 +1,42 @@
-;; (ns src.flux.connections.embedded
-;;   (:require
-;;    [clojure.test :refer [deftest is]]
-;;    [flux.core :refer :all]
-;;    [flux.connections.embedded :refer :all]))
+(ns src.flux.connections.embedded
+  (:require
+   [midje.sweet :refer :all]
+   [flux.core :refer :all]
+   [flux.connections.embedded :refer :all]))
 
-;; (deftest embedded-solr
-;;   (let [cc (create-core-container)]
-;;    (is (= org.apache.solr.client.solrj.embedded.EmbeddedSolrServer
-;;           (type (set-default-connection (create cc :flux_test))))
-;;        "Created correct connection type"))
-;;   (is (= 0 (get-in (add [{:id 1} {:id 2}]) [:responseHeader :status]))
-;;       "Was able to drop in 2 test ids")
-;;   (is (= 0 (get-in (commit) [:responseHeader :status]))
-;;       "Commited successfully")
-;;   (is (some
-;;        #(= 1 %)
-;;        (map :id
-;;             (get-in
-;;              (query "*:*")
-;;              [:response :docs])))
-;;       "Testing if we can find back id 1")
-;;   (is (= 0 (get-in (delete-by-query "*:*") [:responseHeader :status]))
-;;       "Deleting everything")
-;;   (is (= 0 (get-in (commit) [:responseHeader :status]))
-;;       "Commited successfully"))
+(def spy (atom nil))
 
-;; (with-connection 
-;;   (let [cc (create-core-container)]  
-;;     (create cc :flux_test))
-;;   (add [{:id 1} {:id 2}]))
-      
+(fact "functiontest-against-embedded"
+      (let [cc (create-core-container)] 
+        (try    
+          (type cc) => org.apache.solr.core.CoreContainer
+          (.load cc) => nil
+          (.waitForLoadingCoresToFinish cc 60000) => nil          
+          (let [con (create cc :flux_test)]
+            (try 
+              (type (set-default-connection con)) =>
+              org.apache.solr.client.solrj.embedded.EmbeddedSolrServer
+              (get-in (add [{:id 1} {:id 2}]) [:responseHeader :status]) => 0
+              (get-in (commit) [:responseHeader :status]) => 0
+              (let [docs (get-in
+                          (query "*:*")
+                          [:response :docs])]
+                (reset! spy docs)
+                (some
+                 #(= 1 %)
+                 (map :id docs)) => true)
+              (get-in (delete-by-query "*:*") [:responseHeader :status]) => 0
+              (get-in (commit) [:responseHeader :status]) => 0
+              (finally (.close con))))
+          (finally (doto cc
+                     (.shutdown))))))
+
+;; Helper to create the core for testing
+;; or debugging or just inspiration
+;; (def cc2 (create-core-container))
+;; (.load cc2)
+;; (.getAllCoreNames cc2)
+;; If corenames are empty creat it
+;; (.create cc2 "flux_test" {})
+;; (.shutdown cc2)
+;; (.isShutDown cc2)

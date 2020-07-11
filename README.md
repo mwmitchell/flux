@@ -1,12 +1,13 @@
 # flux
 
-A Clojure based Solr client. The latest stable version of flux is 0.6.3, which supports Solr `8.5.2`.
+A Clojure based Solr client. The latest stable version of flux is 0.7.0, which supports Solr `8.5.2` and java 14.
+For Java 12 support change the `slf4j` in `project.clj`.
 
 ## Installation (Leiningen)
 
 To include the Flux library, add the following to your `:dependencies`:
 
-    [com.codesignals/flux "0.6.3"]
+    [com.codesignals/flux "0.7.0"]
 
 ## Usage
 
@@ -166,6 +167,18 @@ Once a connection as been created, use the `with-connection` macro to wrap clien
       (q/create-query-request :post "/docs" {:q "etc"}))
 ```
 
+new with version `0.7.0` you can now use the `set-default-connection`. All client calls will use this connection if no other connection is given by `with-connection`.
+
+```clojure
+(require '[flux.core :as flux]
+         '[flux.query :as q])
+
+(flux/set-default-connection conn)
+(flux/add [{:id 1} {:id 2}])
+(flux/commit)
+(flux/query "*:*")
+```
+
 #### Query options
 You can also specify additional query options (filter queries, fields, ...):
 ```clojure
@@ -173,7 +186,37 @@ You can also specify additional query options (filter queries, fields, ...):
     (flux/query "*:*" options)
 ```
 
+#### Special options
+
+In past all values returned by Solr were strings, flux now tries to convert them back into Doubles or Longs too.
+If you prefer the old way the `->clojure` function worked or need a possible better performance you can change back to the old way by:
+
+```clojure
+(require '[flux.converter :refer [set-stringoutput-only]])
+
+;; Only strings in return
+(set-stringoutput-only true)
+;; Allow to try to parse
+(set-stringoutput-only false)
+```
+
 ### Test
+
+Prepare a local zookeeper and solr with collection flux_test then run the tests.
+
+Usually it's downloading both programms, configure zookeeper and start them, 
+then create the collection or use parametered start to do so.
+
+Help config zk: [zookeeper minimum config](https://lucene.apache.org/solr/guide/8_5/setting-up-an-external-zookeeper-ensemble.html#initial-configuration)
+
+Help start zk: [zookeeper startup](https://lucene.apache.org/solr/guide/8_5/setting-up-an-external-zookeeper-ensemble.html#starting-and-stopping-zookeeper)
+
+Solr cloud start: [solr sstartup](https://lucene.apache.org/solr/guide/8_5/solr-tutorial.html#launch-solr-in-solrcloud-mode)
+
+remember one node is enough in dev-test!
+
+After you are done verify with the following command that nothing is broken. Do not forget to write docstrings and tests! 
+
 ```shell
 lein midje
 ```

@@ -1,5 +1,5 @@
-(defproject com.codesignals/flux "0.6.3"
-  :description "A clojure client library for Solr"
+(defproject com.codesignals/flux "0.7.0"
+  :description "A clojure client library for Solr 8.5.2"
   :url "https://github.com/mwmitchell/flux"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
@@ -14,4 +14,6 @@
                    :resource-paths ["dev-resources"]
                    :plugins [[lein-midje "3.2.1"]]}}
   :source-paths ["src"]
-  :test-paths ["test"])
+  :test-paths ["test"]
+  :codox {:source-uri "https://github.com/mwmitchell/flux/tree/master/{filepath}#L{line}"
+          :metadata {:doc/format :markdown}})

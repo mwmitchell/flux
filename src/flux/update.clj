@@ -7,28 +7,28 @@
 
 ;; NOTE: The result of this function is a SolrInputDocument
 ;; which throws an exception when printed!
-(defn create-doc ^SolrInputDocument 
+(defn create-doc 
   "creates the inputDocument for solr.
    
    document-map
-   : takes a map to convert 
+   : takes a map to convert, adding children with the keyword `:__childDocuments [...]`.
    
    examples
-   {:id 1 :map {:int 22 :string \"abc\"}} 
+   `{:id 1 :map {:int 22 :string \"abc\"}}`
    will create 
-   \"SolrInputDocument(fields: [id=1, map={string=abc, int=22}])\"
+   `\"SolrInputDocument(fields: [id=1, map={string=abc, int=22}])\"`
    
    or
-   {:id 1 :_childDocuments_ [{:id 2} {:id 3}]}
+   `{:id 1 :__childDocuments [{:id 2} {:id 3}]}`
    will create 
-   \"SolrInputDocument(fields: [id=1], 
-     children: [SolrInputDocument(fields: [id=2]), SolrInputDocument(fields: [id=3])])\"
+   `\"SolrInputDocument(fields: [id=1], 
+     children: [SolrInputDocument(fields: [id=2]), SolrInputDocument(fields: [id=3])])\"`
    "
   
-  [document-map]
+  ^SolrInputDocument [document-map]
   (reduce-kv (fn [^SolrInputDocument doc k v]
                (cond
-                 (= k :_childDocuments_)
+                 (= k :__childDocuments)
                  (doto doc (.addChildDocuments (map create-doc v)))
                  
                  (map? v)

@@ -165,4 +165,4 @@
    collection-name
    : name of collection to use"
   [connection collection-name]
-  (. connection setDefaultCollection (name collection-name)))
+  (.setDefaultCollection connection (name collection-name)))

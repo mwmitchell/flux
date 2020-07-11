@@ -6,3 +6,4 @@ pom.xml
 .lein-deps-sum
 .lein-repl-history
 /target/
+/solr/flux_test/data/tlog/
