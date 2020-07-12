@@ -6,6 +6,10 @@
 
 (fact "create-doc"
       (class (create-doc {:id 1})) => org.apache.solr.common.SolrInputDocument
+	  ;; Just to mention, for testing this is sufficient
+	  ;; if you try to add it to Solr you will get an error
+	  ;; Unknown operation for the an atomic update, operation ignored
+	  ;; See https://lucene.apache.org/solr/guide/8_5/updating-parts-of-documents.html
       (.toString
        (create-doc {:id 1 :map {:int 2 :string "abc"}})) => "SolrInputDocument(fields: [id=1, map={string=abc, int=2}])")
 

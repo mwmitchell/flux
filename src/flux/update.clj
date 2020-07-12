@@ -14,9 +14,9 @@
    : takes a map to convert, adding children with the keyword `:__childDocuments [...]`.
    
    examples
-   `{:id 1 :map {:int 22 :string \"abc\"}}`
+   `{:id 1 :vector {:add [\"22\" \"abc\"]}}`
    will create 
-   `\"SolrInputDocument(fields: [id=1, map={string=abc, int=22}])\"`
+   `\"SolrInputDocument(fields: [id=1, vector={add=[\"22\" \"abc\"]}])\"`
    
    or
    `{:id 1 :__childDocuments [{:id 2} {:id 3}]}`
