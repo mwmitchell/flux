@@ -75,7 +75,7 @@
   (let [filter-queries (format-filter-queries (:fq options))
         options (if (empty? filter-queries)
                   (dissoc options :fq)
-                  (assoc :fq filter-queries))]    
+                  (assoc options :fq filter-queries))]    
     (create-solr-params (assoc options :q query))))
 
 (defn create-query-request
