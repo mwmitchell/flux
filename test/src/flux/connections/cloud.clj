@@ -17,6 +17,12 @@
               (get-in
                (query "*:*")
                [:response :docs]))) => true
+		 (some
+         #(= 1 %)
+         (map :id
+              (get-in
+               (query "*:*" {:fq {:id 1}})
+               [:response :docs]))) => true
         (get-in (delete-by-query "*:*") [:responseHeader :status]) => 0
         (get-in (commit) [:responseHeader :status]) => 0))
 
