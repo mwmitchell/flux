@@ -4,5 +4,13 @@ pom.xml
 /classes/
 /targets/
 .lein-deps-sum
+.lein-failures 
 .lein-repl-history
 /target/
+/solr/flux_test/data/tlog/
+.DS_Store
+
+/.nrepl-port
+/pom.xml.asc
+.idea
+*.iml
