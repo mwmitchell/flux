@@ -4,11 +4,11 @@
             [flux.response :refer [->clojure]])
   (:import [org.apache.solr.client.solrj SolrClient]))
 
-(defn query [^SolrClient solr-server query & [options]]
-  (->clojure (.query solr-server (create-query query options))))
+(defn query [^SolrClient client query & [options]]
+  (->clojure (.query client (create-query query options))))
 
-(defn request [^SolrClient solr-server request]
-  (->clojure (.request solr-server request)))
+(defn request [^SolrClient client request]
+  (->clojure (.request client request)))
 
 (defmulti add
   (fn [_ input & _]
